@@ -11,6 +11,7 @@ import { kanjiMasterChapter } from "@/data/books"
 import { useJlptProgress } from "@/hooks/use-jlpt-progress"
 import { displayMeaning } from "@/lib/jlpt/burmese"
 import { loadKanji, loadVocab } from "@/lib/jlpt/catalog"
+import { entryHref, findById } from "@/lib/jlpt/ids"
 import type { KanjiEntry, VocabEntry } from "@/lib/jlpt/types"
 
 export default function KanjiDetailPage({
@@ -24,16 +25,26 @@ export default function KanjiDetailPage({
   const { progress, toggleBookmark, markKnown } = useJlptProgress()
 
   useEffect(() => {
-    loadKanji().then((all) => {
-      const found = all.find((entry) => entry.id === id) ?? null
-      setItem(found)
-      if (!found) return
-      loadVocab().then((vocab) => {
-        setCompounds(
-          vocab.filter((word) => word.word.includes(found.character)).slice(0, 8)
-        )
+    let cancelled = false
+    loadKanji()
+      .then((all) => {
+        if (cancelled) return
+        const found = findById(all, id)
+        setItem(found)
+        if (!found) return
+        loadVocab().then((vocab) => {
+          if (cancelled) return
+          setCompounds(
+            vocab.filter((word) => word.word.includes(found.character)).slice(0, 8)
+          )
+        })
       })
-    })
+      .catch(() => {
+        if (!cancelled) setItem(null)
+      })
+    return () => {
+      cancelled = true
+    }
   }, [id])
 
   const meaning = useMemo(
@@ -94,7 +105,7 @@ export default function KanjiDetailPage({
       <section>
         <h2 className="font-heading text-base font-semibold">例文</h2>
         <div className="mt-2 grid gap-2">
-          {(item.examples.length ? item.examples : []).slice(0, 3).map((example) => (
+          {(item.examples?.length ? item.examples : []).slice(0, 3).map((example) => (
             <figure key={example.ja} className="rounded-3xl bg-card p-4 ring-1 ring-foreground/8">
               <p className="text-lg">
                 <FuriganaSentence
@@ -112,7 +123,7 @@ export default function KanjiDetailPage({
               </div>
             </figure>
           ))}
-          {!item.examples.length ? (
+          {!item.examples?.length ? (
             <p className="text-sm text-muted-foreground">ဥပမာဝါကျ မရှိသေးပါ။</p>
           ) : null}
         </div>
@@ -122,7 +133,7 @@ export default function KanjiDetailPage({
         <ul className="mt-2 grid gap-2">
           {compounds.map((word) => (
             <li key={word.id}>
-              <Link href={`/vocab/${word.id}`} className="text-primary">
+              <Link href={entryHref("/vocab", word.id)} className="text-primary">
                 {word.word}{" "}
                 <span className="text-muted-foreground">({word.reading})</span>
               </Link>

@@ -11,6 +11,7 @@ import { useJlptProgress } from "@/hooks/use-jlpt-progress"
 import { displayMeaning } from "@/lib/jlpt/burmese"
 import { loadVocab } from "@/lib/jlpt/catalog"
 import { itemsInChapter, itemsInSection } from "@/lib/jlpt/curriculum"
+import { entryHref } from "@/lib/jlpt/ids"
 import type { VocabEntry } from "@/lib/jlpt/types"
 
 export default function TangoChapterPage({
@@ -76,7 +77,7 @@ export default function TangoChapterPage({
                       className="rounded-3xl bg-card p-4 ring-1 ring-foreground/8"
                     >
                       <div className="flex items-start gap-2">
-                        <Link href={`/vocab/${item.id}`} className="min-w-0 flex-1">
+                        <Link href={entryHref("/vocab", item.id)} className="min-w-0 flex-1">
                           <p className="font-heading text-xl font-semibold">
                             <RubyWord word={item.word} reading={item.reading} />
                           </p>

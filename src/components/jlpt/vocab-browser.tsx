@@ -13,6 +13,7 @@ import { useJlptProgress } from "@/hooks/use-jlpt-progress"
 import { KANA_ROWS, loadVocab, matchesKanaRow } from "@/lib/jlpt/catalog"
 import { displayMeaning } from "@/lib/jlpt/burmese"
 import { chapterProgress } from "@/lib/jlpt/curriculum"
+import { entryHref } from "@/lib/jlpt/ids"
 import type { VocabEntry } from "@/lib/jlpt/types"
 import { cn } from "@/lib/utils"
 
@@ -176,7 +177,7 @@ export function VocabBrowser() {
                   key={item.id}
                   className="flex items-center gap-2 rounded-2xl bg-card p-3 ring-1 ring-foreground/8"
                 >
-                  <Link href={`/vocab/${item.id}`} className="min-w-0 flex-1">
+                  <Link href={entryHref("/vocab", item.id)} className="min-w-0 flex-1">
                     <p className="truncate font-heading text-lg font-semibold">
                       <RubyWord word={item.word} reading={item.reading} />
                     </p>

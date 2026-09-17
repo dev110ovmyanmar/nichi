@@ -157,6 +157,7 @@ export function assignVocab(raw: RawVocab[]): VocabEntry[] {
     counts[key] = (counts[key] ?? 0) + 1
     return {
       ...item,
+      examples: item.examples ?? [],
       chapterId: slot.chapterId,
       sectionId: slot.sectionId,
       order: counts[key],

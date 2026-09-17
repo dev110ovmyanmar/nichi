@@ -11,6 +11,7 @@ import { useJlptProgress } from "@/hooks/use-jlpt-progress"
 import { loadKanji } from "@/lib/jlpt/catalog"
 import { displayMeaning } from "@/lib/jlpt/burmese"
 import { chapterProgress } from "@/lib/jlpt/curriculum"
+import { entryHref } from "@/lib/jlpt/ids"
 import type { KanjiEntry } from "@/lib/jlpt/types"
 import { cn } from "@/lib/utils"
 
@@ -106,7 +107,7 @@ export function KanjiBrowser() {
                   key={item.id}
                   className="flex flex-col items-center rounded-2xl bg-card p-3 text-center ring-1 ring-foreground/8"
                 >
-                  <Link href={`/kanji/${item.id}`} className="block">
+                  <Link href={entryHref("/kanji", item.id)} className="block">
                     <span className="font-heading text-3xl">{item.character}</span>
                     <span className="mt-1 block line-clamp-1 text-[11px] text-muted-foreground">
                       {displayMeaning(item.meanings, item.meaningMy)}

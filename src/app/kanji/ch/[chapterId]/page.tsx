@@ -9,6 +9,7 @@ import { useJlptProgress } from "@/hooks/use-jlpt-progress"
 import { displayMeaning } from "@/lib/jlpt/burmese"
 import { loadKanji } from "@/lib/jlpt/catalog"
 import { itemsInChapter, itemsInSection } from "@/lib/jlpt/curriculum"
+import { entryHref } from "@/lib/jlpt/ids"
 import type { KanjiEntry } from "@/lib/jlpt/types"
 
 export default function KanjiChapterPage({
@@ -68,7 +69,7 @@ export default function KanjiChapterPage({
                     key={item.id}
                     className="rounded-3xl bg-card p-3 ring-1 ring-foreground/8"
                   >
-                    <Link href={`/kanji/${item.id}`} className="block text-center">
+                    <Link href={entryHref("/kanji", item.id)} className="block text-center">
                       <span className="font-heading text-4xl">{item.character}</span>
                       <span className="mt-1 block text-[11px] text-muted-foreground">
                         {item.strokes}画 · {item.radical}

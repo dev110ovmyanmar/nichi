@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button"
 import { useJlptProgress } from "@/hooks/use-jlpt-progress"
 import { displayMeaning } from "@/lib/jlpt/burmese"
 import { loadVocab } from "@/lib/jlpt/catalog"
+import { findById } from "@/lib/jlpt/ids"
 import type { VocabEntry } from "@/lib/jlpt/types"
 
 export default function VocabDetailPage({
@@ -23,11 +24,20 @@ export default function VocabDetailPage({
   const { progress, toggleBookmark, markKnown, update } = useJlptProgress()
 
   useEffect(() => {
-    loadVocab().then((all) => {
-      const found = all.find((entry) => entry.id === id) ?? null
-      setItem(found)
-      if (found) update({ lastVocabId: found.id })
-    })
+    let cancelled = false
+    loadVocab()
+      .then((all) => {
+        if (cancelled) return
+        const found = findById(all, id)
+        setItem(found)
+        if (found) update({ lastVocabId: found.id })
+      })
+      .catch(() => {
+        if (!cancelled) setItem(null)
+      })
+    return () => {
+      cancelled = true
+    }
   }, [id, update])
 
   if (item === undefined) {
@@ -71,7 +81,7 @@ export default function VocabDetailPage({
           <li key={meaning}>· {meaning}</li>
         ))}
       </ul>
-      {item.examples.map((example) => (
+      {(item.examples ?? []).map((example) => (
         <figure key={example.ja} className="rounded-3xl bg-card p-4 ring-1 ring-foreground/8">
           <blockquote className="text-lg">
             <FuriganaSentence ja={example.ja} word={item.word} reading={item.reading} />

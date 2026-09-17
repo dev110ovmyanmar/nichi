@@ -64,6 +64,9 @@ function read(): JlptProgress {
         ...empty.completedChapters,
         ...parsed.completedChapters,
       },
+      knownVocab: parsed.knownVocab ?? empty.knownVocab,
+      knownKanji: parsed.knownKanji ?? empty.knownKanji,
+      quizHistory: parsed.quizHistory ?? empty.quizHistory,
     }
     return memory
   } catch {
