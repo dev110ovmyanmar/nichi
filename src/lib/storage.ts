@@ -1,6 +1,11 @@
-import { DEFAULT_SETTINGS, LEGACY_STORAGE_KEYS, STORAGE_KEY, SUBJECT_ALIASES, SUBJECTS } from "@/lib/constants"
+import { DEFAULT_SETTINGS, LEGACY_STORAGE_KEYS, STORAGE_KEY, SUBJECTS } from "@/lib/constants"
 import { addDays, todayISO } from "@/lib/dates"
 import type { AppSettings, AppStore, MasteryStatus, StudyLog } from "@/lib/types"
+
+const SUBJECT_ALIASES: Record<string, string> = {
+  "JLPT N2 Grammar": "Grammar",
+  "Mock Test": "Past Papers",
+}
 
 function createId() {
   if (typeof crypto !== "undefined" && "randomUUID" in crypto) {

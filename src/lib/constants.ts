@@ -3,11 +3,6 @@ import type { AppSettings, MasteryStatus } from "@/lib/types"
 export const STORAGE_KEY = "nichi.study-store.v2"
 export const LEGACY_STORAGE_KEYS = ["nichi.study-store.v1"]
 
-export const SUBJECT_ALIASES: Record<string, string> = {
-  "JLPT N2 Grammar": "Grammar",
-  "Mock Test": "Past Papers",
-}
-
 export const SUBJECTS = [
   "Kanji",
   "Grammar",

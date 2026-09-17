@@ -234,7 +234,7 @@ export function StudyForm({ editing, onSubmit, onCancelEdit }: StudyFormProps) {
             <p className="text-xs text-muted-foreground">
               {editing
                 ? "Presets fill the duration fields. Save when you are done."
-                : "Presets instantly log this subject for today."}
+                : "Tap +15m / +30m / +1h to log immediately, or set a custom time and press Add session."}
             </p>
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="grid gap-1.5">
@@ -264,6 +264,10 @@ export function StudyForm({ editing, onSubmit, onCancelEdit }: StudyFormProps) {
                 />
               </div>
             </div>
+            <Button type="submit" size="lg" className="w-full sm:w-auto">
+              <Check data-icon="inline-start" />
+              {editing ? "Save changes" : "Add session"}
+            </Button>
           </div>
 
           <div className="grid gap-1.5">
