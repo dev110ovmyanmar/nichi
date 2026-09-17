@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react"
 import { Check, RotateCcw } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import { Button, buttonVariants } from "@/components/ui/button"
 import {
   Card,
   CardContent,
@@ -109,8 +109,7 @@ export function StudyForm({ editing, onSubmit, onCancelEdit }: StudyFormProps) {
     update("minutes", split.minutes)
   }
 
-  function handleSubmit(event: React.FormEvent) {
-    event.preventDefault()
+  function saveDraft() {
     const subject = usingCustom ? customSubject.trim() : draft.subject.trim()
     const hours = Number(draft.hours) || 0
     const minutes = Number(draft.minutes) || 0
@@ -147,6 +146,11 @@ export function StudyForm({ editing, onSubmit, onCancelEdit }: StudyFormProps) {
     setError(null)
   }
 
+  function handleSubmit(event: React.FormEvent) {
+    event.preventDefault()
+    saveDraft()
+  }
+
   return (
     <Card id="logger">
       <CardHeader className="border-b">
@@ -158,7 +162,7 @@ export function StudyForm({ editing, onSubmit, onCancelEdit }: StudyFormProps) {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <form className="grid gap-4" onSubmit={handleSubmit}>
+        <form className="grid gap-4" onSubmit={handleSubmit} noValidate>
           <div className="grid gap-1.5">
             <Label htmlFor="study-date">Date</Label>
             <Input
@@ -264,10 +268,14 @@ export function StudyForm({ editing, onSubmit, onCancelEdit }: StudyFormProps) {
                 />
               </div>
             </div>
-            <Button type="submit" size="lg" className="w-full sm:w-auto">
+            <button
+              type="button"
+              onClick={saveDraft}
+              className={cn(buttonVariants({ size: "lg" }), "w-full sm:w-auto")}
+            >
               <Check data-icon="inline-start" />
               {editing ? "Save changes" : "Add session"}
-            </Button>
+            </button>
           </div>
 
           <div className="grid gap-1.5">
@@ -317,10 +325,14 @@ export function StudyForm({ editing, onSubmit, onCancelEdit }: StudyFormProps) {
           {error ? <p className="text-sm text-destructive">{error}</p> : null}
 
           <div className="flex flex-wrap gap-2">
-            <Button type="submit">
+            <button
+              type="button"
+              onClick={saveDraft}
+              className={buttonVariants()}
+            >
               <Check data-icon="inline-start" />
               {editing ? "Save changes" : "Add session"}
-            </Button>
+            </button>
             {editing ? (
               <Button type="button" variant="outline" onClick={onCancelEdit}>
                 <RotateCcw data-icon="inline-start" />
