@@ -1,8 +1,10 @@
 "use client"
 
 import { useMemo, useState } from "react"
+import { createPortal } from "react-dom"
 import { Check, RotateCcw } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { useHydrated } from "@/hooks/use-hydrated"
 import {
   Card,
   CardContent,
@@ -69,6 +71,7 @@ export function StudyForm({ editing, onSubmit, onCancelEdit }: StudyFormProps) {
   )
   const [error, setError] = useState<string | null>(null)
   const [showCustomTime, setShowCustomTime] = useState(false)
+  const hydrated = useHydrated()
 
   const usingCustom = !knownSubjects.has(draft.subject)
   const selectedMinutes = draft.hours * 60 + draft.minutes
@@ -160,7 +163,7 @@ export function StudyForm({ editing, onSubmit, onCancelEdit }: StudyFormProps) {
         <Button
           key={minutes}
           type="button"
-          className="h-12 rounded-2xl text-base font-semibold md:h-11 md:rounded-xl md:text-sm"
+          className="h-12 rounded-2xl text-base font-semibold lg:h-11 lg:rounded-xl lg:text-sm"
           variant="secondary"
           onClick={() => applyPreset(minutes, !editing)}
         >
@@ -171,13 +174,14 @@ export function StudyForm({ editing, onSubmit, onCancelEdit }: StudyFormProps) {
   )
 
   return (
-    <Card id="logger" className="scroll-mt-20">
+    <>
+      <Card id="logger" className="scroll-mt-20">
       <CardHeader className="border-b">
         <CardTitle className="text-lg sm:text-base">
           {editing ? "Edit session" : "Log study"}
         </CardTitle>
         <CardDescription>
-          Tap a time chip to save. Custom hours are optional.
+          Pick a subject, then tap a time. On a phone the chips stay at the bottom.
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -238,26 +242,17 @@ export function StudyForm({ editing, onSubmit, onCancelEdit }: StudyFormProps) {
                 {formatDuration(selectedMinutes)}
               </span>
             </div>
-            <div className="hidden md:block">{presetButtons}</div>
-            <div className="flex items-center justify-between md:hidden">
-              <button
-                type="button"
-                onClick={() => setShowCustomTime((open) => !open)}
-                className="min-h-11 text-sm font-medium text-muted-foreground"
-              >
-                {showCustomTime ? "Hide custom time" : "Custom time"}
-              </button>
-              <button
-                type="button"
-                onClick={saveDraft}
-                className="min-h-11 text-sm font-semibold text-primary"
-              >
-                Save {formatDuration(selectedMinutes)}
-              </button>
-            </div>
+            <div className="hidden lg:block">{presetButtons}</div>
+            <button
+              type="button"
+              onClick={() => setShowCustomTime((open) => !open)}
+              className="min-h-11 appearance-none bg-transparent p-0 text-left text-sm font-medium text-muted-foreground lg:hidden"
+            >
+              {showCustomTime ? "Hide custom time" : "Need a custom time?"}
+            </button>
             <div
               className={cn(
-                "grid-cols-2 gap-3 md:grid",
+                "grid-cols-2 gap-3 lg:grid",
                 showCustomTime ? "grid" : "hidden"
               )}
             >
@@ -293,7 +288,10 @@ export function StudyForm({ editing, onSubmit, onCancelEdit }: StudyFormProps) {
             <button
               type="button"
               onClick={saveDraft}
-              className="hidden min-h-11 text-left text-sm font-semibold text-primary md:inline"
+              className={cn(
+                "min-h-11 appearance-none bg-transparent p-0 text-left text-sm font-medium text-primary underline-offset-4 hover:underline",
+                showCustomTime || editing ? "inline" : "hidden lg:inline"
+              )}
             >
               Save {formatDuration(selectedMinutes)}
             </button>
@@ -337,7 +335,7 @@ export function StudyForm({ editing, onSubmit, onCancelEdit }: StudyFormProps) {
           {error ? <p className="text-sm text-destructive">{error}</p> : null}
 
           {editing ? (
-            <div className="hidden gap-2 md:flex">
+            <div className="hidden gap-2 lg:flex">
               <Button type="button" className="h-11 flex-1" onClick={saveDraft}>
                 <Check data-icon="inline-start" />
                 Save
@@ -355,26 +353,35 @@ export function StudyForm({ editing, onSubmit, onCancelEdit }: StudyFormProps) {
           ) : null}
         </form>
       </CardContent>
-
-      <div className="fixed inset-x-0 bottom-0 z-50 border-t border-border/70 bg-background/90 px-4 pt-3 shadow-[0_-8px_24px_oklch(0.28_0.035_250/0.08)] backdrop-blur-xl pb-[max(0.85rem,env(safe-area-inset-bottom))] md:hidden">
-        {editing ? (
-          <div className="mx-auto flex max-w-6xl gap-2">
-            <Button type="button" className="h-12 flex-1 rounded-2xl" onClick={saveDraft}>
-              Save
-            </Button>
-            <Button
-              type="button"
-              variant="outline"
-              className="h-12 rounded-2xl"
-              onClick={onCancelEdit}
-            >
-              Cancel
-            </Button>
-          </div>
-        ) : (
-          <div className="mx-auto max-w-6xl">{presetButtons}</div>
-        )}
-      </div>
-    </Card>
+      </Card>
+      {hydrated
+        ? createPortal(
+            <div className="fixed inset-x-0 bottom-0 z-50 border-t border-border/70 bg-background/90 px-4 pt-3 shadow-[0_-12px_32px_oklch(0.28_0.035_250/0.12)] backdrop-blur-xl pb-[max(0.85rem,env(safe-area-inset-bottom))] lg:hidden">
+              {editing ? (
+                <div className="mx-auto flex max-w-6xl gap-2">
+                  <Button
+                    type="button"
+                    className="h-12 flex-1 rounded-2xl"
+                    onClick={saveDraft}
+                  >
+                    Save
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="h-12 rounded-2xl"
+                    onClick={onCancelEdit}
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              ) : (
+                <div className="mx-auto max-w-6xl">{presetButtons}</div>
+              )}
+            </div>,
+            document.body
+          )
+        : null}
+    </>
   )
 }
