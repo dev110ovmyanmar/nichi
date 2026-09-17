@@ -44,3 +44,4 @@ TypeScript interfaces live in `src/lib/jlpt/types.ts`. Vocab weeks are in `src/d
 - Burmese grammar notes, reading passages, listening scripts, mock-exam copy, and the week/day *shells* are original Nichi content.
 - Audio uses the browser `speechSynthesis` Japanese voice when available.
 # nichi
+# nichi
