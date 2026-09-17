@@ -12,21 +12,13 @@ import {
 } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
-import { SUBJECTS } from "@/lib/constants"
+import { DURATION_PRESETS, SUBJECTS } from "@/lib/constants"
 import { todayISO } from "@/lib/dates"
+import { formatDuration, splitMinutes } from "@/lib/stats"
 import { cn } from "@/lib/utils"
 import type { MasteryStatus, StudyLog } from "@/lib/types"
 import type { LogDraft } from "@/hooks/use-study-store"
-
-const CUSTOM_VALUE = "__custom__"
 
 const STATUS_OPTIONS: Array<{
   value: MasteryStatus
@@ -47,11 +39,12 @@ type StudyFormProps = {
 function emptyDraft(): LogDraft {
   return {
     date: todayISO(),
-    subject: "JLPT N2 Grammar",
+    subject: "Grammar",
     hours: 0,
     minutes: 30,
     notes: "",
     status: "in_progress",
+    source: "manual",
   }
 }
 
@@ -63,6 +56,7 @@ function draftFromLog(log: StudyLog): LogDraft {
     minutes: log.minutes,
     notes: log.notes,
     status: log.status,
+    source: log.source ?? "manual",
   }
 }
 
@@ -76,23 +70,53 @@ export function StudyForm({ editing, onSubmit, onCancelEdit }: StudyFormProps) {
   )
   const [error, setError] = useState<string | null>(null)
 
-  const selectValue = knownSubjects.has(draft.subject)
-    ? draft.subject
-    : CUSTOM_VALUE
+  const usingCustom = !knownSubjects.has(draft.subject)
+  const selectedMinutes = draft.hours * 60 + draft.minutes
 
   function update<K extends keyof LogDraft>(key: K, value: LogDraft[K]) {
     setDraft((current) => ({ ...current, [key]: value }))
   }
 
+  function setSubject(subject: string) {
+    setCustomSubject("")
+    update("subject", subject)
+  }
+
+  function applyPreset(total: number, logNow: boolean) {
+    const split = splitMinutes(total)
+    if (logNow) {
+      const subject = usingCustom ? customSubject.trim() : draft.subject
+      if (!subject) {
+        setError("Pick a subject tag first.")
+        return
+      }
+      onSubmit({
+        ...draft,
+        subject,
+        hours: split.hours,
+        minutes: split.minutes,
+        notes: draft.notes.trim(),
+        source: "preset",
+      })
+      if (!editing) {
+        setDraft({ ...emptyDraft(), subject: knownSubjects.has(subject) ? subject : "Grammar" })
+        setCustomSubject(knownSubjects.has(subject) ? "" : "")
+      }
+      setError(null)
+      return
+    }
+    update("hours", split.hours)
+    update("minutes", split.minutes)
+  }
+
   function handleSubmit(event: React.FormEvent) {
     event.preventDefault()
-    const subject =
-      selectValue === CUSTOM_VALUE ? customSubject.trim() : draft.subject.trim()
+    const subject = usingCustom ? customSubject.trim() : draft.subject.trim()
     const hours = Number(draft.hours) || 0
     const minutes = Number(draft.minutes) || 0
 
     if (!subject) {
-      setError("Choose a subject or enter a custom topic.")
+      setError("Choose a subject tag.")
       return
     }
     if (hours < 0 || minutes < 0 || minutes > 59) {
@@ -110,12 +134,13 @@ export function StudyForm({ editing, onSubmit, onCancelEdit }: StudyFormProps) {
       hours,
       minutes,
       notes: draft.notes.trim(),
+      source: editing ? draft.source : "manual",
     })
 
     if (!editing) {
       setDraft({
         ...emptyDraft(),
-        subject: knownSubjects.has(subject) ? subject : "JLPT N2 Grammar",
+        subject: knownSubjects.has(subject) ? subject : "Grammar",
       })
       setCustomSubject(knownSubjects.has(subject) ? "" : "")
     }
@@ -129,91 +154,115 @@ export function StudyForm({ editing, onSubmit, onCancelEdit }: StudyFormProps) {
           {editing ? "Edit session" : "Log today’s study"}
         </CardTitle>
         <CardDescription>
-          မှတ်တမ်းတင်ရန် · date, topic, time, takeaways, and mastery
+          Date, subject tag, duration, notes — or tap a preset to log instantly
         </CardDescription>
       </CardHeader>
       <CardContent>
         <form className="grid gap-4" onSubmit={handleSubmit}>
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div className="grid gap-1.5">
-              <Label htmlFor="study-date">Date</Label>
-              <Input
-                id="study-date"
-                type="date"
-                value={draft.date}
-                max={todayISO()}
-                onChange={(event) => update("date", event.target.value)}
-                required
-              />
-            </div>
-            <div className="grid gap-1.5">
-              <Label htmlFor="study-subject">Subject / topic</Label>
-              <Select
-                value={selectValue}
-                onValueChange={(value) => {
-                  if (value === CUSTOM_VALUE) {
-                    update("subject", customSubject || "")
-                    return
-                  }
-                  if (value) update("subject", value)
-                }}
-              >
-                <SelectTrigger id="study-subject" className="w-full">
-                  <SelectValue placeholder="Choose a topic" />
-                </SelectTrigger>
-                <SelectContent alignItemWithTrigger={false} align="start">
-                  {SUBJECTS.map((subject) => (
-                    <SelectItem key={subject} value={subject}>
-                      {subject}
-                    </SelectItem>
-                  ))}
-                  <SelectItem value={CUSTOM_VALUE}>Custom topic</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+          <div className="grid gap-1.5">
+            <Label htmlFor="study-date">Date</Label>
+            <Input
+              id="study-date"
+              type="date"
+              value={draft.date}
+              max={todayISO()}
+              onChange={(event) => update("date", event.target.value)}
+              required
+            />
           </div>
 
-          {selectValue === CUSTOM_VALUE ? (
-            <div className="grid gap-1.5">
-              <Label htmlFor="custom-subject">Custom topic</Label>
+          <div className="grid gap-2">
+            <Label>Subject tag</Label>
+            <div className="flex flex-wrap gap-1.5">
+              {SUBJECTS.map((subject) => {
+                const active = draft.subject === subject
+                return (
+                  <Button
+                    key={subject}
+                    type="button"
+                    size="sm"
+                    variant={active ? "default" : "outline"}
+                    onClick={() => setSubject(subject)}
+                  >
+                    {subject}
+                  </Button>
+                )
+              })}
+              <Button
+                type="button"
+                size="sm"
+                variant={usingCustom ? "default" : "outline"}
+                onClick={() => {
+                  update("subject", customSubject || "")
+                }}
+              >
+                Custom
+              </Button>
+            </div>
+            {usingCustom ? (
               <Input
-                id="custom-subject"
-                placeholder="e.g. Keigo, Pitch accent, N2 mock listening"
+                placeholder="e.g. Keigo, pitch accent"
                 value={customSubject}
                 onChange={(event) => {
                   setCustomSubject(event.target.value)
                   update("subject", event.target.value)
                 }}
               />
-            </div>
-          ) : null}
+            ) : null}
+          </div>
 
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div className="grid gap-1.5">
-              <Label htmlFor="study-hours">Hours</Label>
-              <Input
-                id="study-hours"
-                type="number"
-                min={0}
-                max={12}
-                value={draft.hours}
-                onChange={(event) =>
-                  update("hours", Number(event.target.value))
-                }
-              />
+          <div className="grid gap-2">
+            <div className="flex items-center justify-between gap-2">
+              <Label>Duration</Label>
+              <span className="text-xs text-muted-foreground tabular-nums">
+                {formatDuration(selectedMinutes)}
+              </span>
             </div>
-            <div className="grid gap-1.5">
-              <Label htmlFor="study-minutes">Minutes</Label>
-              <Input
-                id="study-minutes"
-                type="number"
-                min={0}
-                max={59}
-                value={draft.minutes}
-                onChange={(event) =>
-                  update("minutes", Number(event.target.value))
-                }
-              />
+            <div className="flex flex-wrap gap-1.5">
+              {DURATION_PRESETS.map((minutes) => (
+                <Button
+                  key={minutes}
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  onClick={() => applyPreset(minutes, !editing)}
+                >
+                  {minutes === 60 ? "+1h" : `+${minutes}m`}
+                </Button>
+              ))}
+            </div>
+            <p className="text-xs text-muted-foreground">
+              {editing
+                ? "Presets fill the duration fields. Save when you are done."
+                : "Presets instantly log this subject for today."}
+            </p>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="grid gap-1.5">
+                <Label htmlFor="study-hours">Hours</Label>
+                <Input
+                  id="study-hours"
+                  type="number"
+                  min={0}
+                  max={12}
+                  value={draft.hours}
+                  onChange={(event) =>
+                    update("hours", Number(event.target.value))
+                  }
+                />
+              </div>
+              <div className="grid gap-1.5">
+                <Label htmlFor="study-minutes">Minutes</Label>
+                <Input
+                  id="study-minutes"
+                  type="number"
+                  min={0}
+                  max={59}
+                  value={draft.minutes}
+                  onChange={(event) =>
+                    update("minutes", Number(event.target.value))
+                  }
+                />
+              </div>
             </div>
           </div>
 

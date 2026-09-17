@@ -1,16 +1,22 @@
-# Nichi — Daily study journal
+# Nichi — Study tracker
 
-Nichi is a focused web app for logging daily study, protecting a streak, and seeing the last seven days of progress. It is built for language learners (JLPT N2 and similar routines) but works for any subject.
+Nichi is a local-first study journal: log sessions, run Pomodoros, protect a streak, and see progress toward an exam date. Built for language exams (JLPT and similar) but it works for any tagged subject.
 
 All data stays in the browser via `localStorage`. There is no account and no server.
 
 ## Features
 
-- **Daily logger** — date (defaults to today), subject, hours/minutes, notes, and mastery tags (`In progress`, `Needs review`, `Completed`). Add, edit, and delete sessions.
-- **Reminders** — customizable daily time and message, in-app toast, optional browser `Notification` API alerts, and a banner when today is still empty.
-- **Streaks** — consecutive days with at least one logged session, plus longest streak.
-- **Weekly analytics** — total time for the last 7 days, a bar chart of minutes per day, and a subject mix (time and percent).
-- **Theme** — light and dark mode, Linear/Notion-like layout, responsive on phone and desktop.
+- **Daily logger** — date (defaults to today), subject tags (Kanji, Grammar, Reading, Listening, Vocabulary, Past Papers), hours/minutes, notes, and mastery.
+- **Quick-add presets** — `+15m`, `+30m`, `+1h` instantly log the selected tag.
+- **Daily target** — progress bar toward a 2-hour default goal (editable).
+- **Exam countdown** — customizable exam name and date.
+- **Streaks** — consecutive days with at least one session.
+- **Weekly analytics** — bar chart of hours per day and a donut of subject mix.
+- **Activity heatmap** — GitHub-style last 17 weeks.
+- **Pomodoro** — 25/5 timer that auto-logs a 25-minute session when a focus block finishes.
+- **Reminders** — daily time and message, in-app toast, optional browser notifications.
+- **Backup** — export and import JSON from settings.
+- **Theme** — light and dark, Linear/Notion-like layout, responsive.
 
 ## Run locally
 
@@ -19,7 +25,7 @@ npm install
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000). The first visit seeds a sample JLPT week so charts are not empty. Restore or clear that sample from **Reminders & settings** (bell icon).
+Open [http://localhost:3000](http://localhost:3000). The first visit seeds sample history so charts and the heatmap are not empty. Restore, clear, or import JSON from **Targets & reminders** (bell icon).
 
 ```bash
 npm run build
@@ -36,4 +42,4 @@ npm start
 
 ## Data
 
-Sessions and settings are stored under the key `nichi.study-store.v1`. Clearing site data in the browser removes them.
+Sessions and settings are stored under `nichi.study-store.v2`. Export JSON from settings if you want a portable backup. Clearing site data in the browser removes them.

@@ -43,6 +43,12 @@ export function formatFullDate(isoDate: string) {
   })
 }
 
+export function formatMonth(isoDate: string) {
+  return parseISODate(isoDate).toLocaleDateString(undefined, {
+    month: "short",
+  })
+}
+
 export function lastNDates(n: number, end = todayISO()) {
   return Array.from({ length: n }, (_, index) => addDays(end, index - (n - 1)))
 }
@@ -50,4 +56,24 @@ export function lastNDates(n: number, end = todayISO()) {
 export function currentTimeHHMM() {
   const now = new Date()
   return `${pad(now.getHours())}:${pad(now.getMinutes())}`
+}
+
+export function startOfWeekSunday(isoDate: string) {
+  const date = parseISODate(isoDate)
+  date.setDate(date.getDate() - date.getDay())
+  return toISODate(date)
+}
+
+export function daysUntil(isoDate: string, from = todayISO()) {
+  const ms =
+    parseISODate(isoDate).setHours(0, 0, 0, 0) -
+    parseISODate(from).setHours(0, 0, 0, 0)
+  return Math.round(ms / 86_400_000)
+}
+
+export function formatClock(totalSeconds: number) {
+  const safe = Math.max(0, Math.floor(totalSeconds))
+  const minutes = Math.floor(safe / 60)
+  const seconds = safe % 60
+  return `${pad(minutes)}:${pad(seconds)}`
 }

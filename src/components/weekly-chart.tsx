@@ -33,8 +33,7 @@ export function WeeklyChart({ series, totalMinutes }: WeeklyChartProps) {
       <CardHeader className="border-b">
         <CardTitle>Weekly time</CardTitle>
         <CardDescription>
-          တစ်ပတ်စာ မှတ်တမ်း · {formatDuration(totalMinutes)} across the last 7
-          days
+          Hours logged each day for the last 7 days · {formatDuration(totalMinutes)} total
         </CardDescription>
       </CardHeader>
       <CardContent className="pt-4">

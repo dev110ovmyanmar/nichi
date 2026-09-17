@@ -2,8 +2,10 @@
 
 import { useCallback, useMemo, useState } from "react"
 import { toast } from "sonner"
+import { ActivityHeatmap } from "@/components/activity-heatmap"
 import { AppHeader } from "@/components/app-header"
 import { LogList } from "@/components/log-list"
+import { PomodoroTimer } from "@/components/pomodoro-timer"
 import { ReminderBanner } from "@/components/reminder-banner"
 import { SettingsDialog } from "@/components/settings-dialog"
 import { StatsOverview } from "@/components/stats-overview"
@@ -13,8 +15,13 @@ import { WeeklyChart } from "@/components/weekly-chart"
 import { useReminder } from "@/hooks/use-reminder"
 import { useStudyStore, type LogDraft } from "@/hooks/use-study-store"
 import { lastNDates, todayISO } from "@/lib/dates"
-import { createSeedLogs } from "@/lib/storage"
 import {
+  createSeedLogs,
+  parseImport,
+  serializeExport,
+} from "@/lib/storage"
+import {
+  activityHeatmap,
   currentStreak,
   formatDuration,
   longestStreak,
@@ -49,6 +56,10 @@ export function StudyApp() {
     () => subjectBreakdown(logs, lastNDates(7, today)),
     [logs, today]
   )
+  const heatmap = useMemo(
+    () => activityHeatmap(logs, 17, settings.dailyGoalMinutes, today),
+    [logs, settings.dailyGoalMinutes, today]
+  )
 
   const handleNotified = useCallback(
     (date: string) => {
@@ -73,14 +84,53 @@ export function StudyApp() {
       return
     }
     addLog(draft)
-    toast.success("Session logged", {
-      description: `${draft.subject} · ${formatDuration(draft.hours * 60 + draft.minutes)}`,
-    })
+    toast.success(
+      draft.source === "preset" ? "Quick session logged" : "Session logged",
+      {
+        description: `${draft.subject} · ${formatDuration(draft.hours * 60 + draft.minutes)}`,
+      }
+    )
   }
+
+  const handlePomodoroComplete = useCallback(
+    (draft: LogDraft) => {
+      addLog(draft)
+    },
+    [addLog]
+  )
 
   function handleEdit(log: StudyLog) {
     setEditing(log)
     document.getElementById("logger")?.scrollIntoView({ behavior: "smooth" })
+  }
+
+  function exportData() {
+    const json = serializeExport({ logs, settings })
+    const blob = new Blob([json], { type: "application/json" })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement("a")
+    link.href = url
+    link.download = `nichi-study-${today}.json`
+    link.click()
+    URL.revokeObjectURL(url)
+    toast.success("Exported study data")
+  }
+
+  async function importData(file: File) {
+    try {
+      const text = await file.text()
+      const next = parseImport(text)
+      replaceAll(next)
+      setEditing(null)
+      toast.success("Imported study data", {
+        description: `${next.logs.length} session${next.logs.length === 1 ? "" : "s"} loaded.`,
+      })
+    } catch (error) {
+      toast.error("Could not import that file", {
+        description:
+          error instanceof Error ? error.message : "Use a Nichi JSON export.",
+      })
+    }
   }
 
   return (
@@ -92,8 +142,8 @@ export function StudyApp() {
             Keep showing up
           </p>
           <h1 className="font-heading max-w-2xl text-3xl font-semibold tracking-tight sm:text-4xl">
-            A quiet place to log study, protect your streak, and see the week
-            clearly.
+            Track daily study, hit a 2-hour target, and watch the exam date get
+            closer.
           </h1>
         </section>
 
@@ -114,20 +164,32 @@ export function StudyApp() {
           streak={streak}
           longestStreak={bestStreak}
           dailyGoalMinutes={settings.dailyGoalMinutes}
+          examName={settings.examName}
+          examDate={settings.examDate}
         />
 
-        <div className="grid gap-6 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)]">
+        <div className="grid gap-6 lg:grid-cols-2">
           <StudyForm
             key={editing?.id ?? "new"}
             editing={editing}
             onSubmit={handleSubmit}
             onCancelEdit={() => setEditing(null)}
           />
-          <div className="grid gap-6">
-            <WeeklyChart series={series} totalMinutes={weekMinutes} />
-            <SubjectBreakdown items={subjects} />
-          </div>
+          <PomodoroTimer
+            subject={settings.pomodoroSubject}
+            onSubjectChange={(subject) =>
+              updateSettings({ pomodoroSubject: subject })
+            }
+            onComplete={handlePomodoroComplete}
+          />
         </div>
+
+        <div className="grid gap-6 lg:grid-cols-2">
+          <WeeklyChart series={series} totalMinutes={weekMinutes} />
+          <SubjectBreakdown items={subjects} />
+        </div>
+
+        <ActivityHeatmap weeks={heatmap} />
 
         <LogList
           logs={logs}
@@ -154,6 +216,8 @@ export function StudyApp() {
           replaceAll({ logs: [] })
           setEditing(null)
         }}
+        onExport={exportData}
+        onImport={importData}
       />
     </div>
   )

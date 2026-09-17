@@ -3,7 +3,13 @@
 import { useCallback, useMemo, useSyncExternalStore } from "react"
 import { DEFAULT_SETTINGS } from "@/lib/constants"
 import { loadStore, newLogId, saveStore } from "@/lib/storage"
-import type { AppSettings, AppStore, MasteryStatus, StudyLog } from "@/lib/types"
+import type {
+  AppSettings,
+  AppStore,
+  LogSource,
+  MasteryStatus,
+  StudyLog,
+} from "@/lib/types"
 
 export type LogDraft = {
   date: string
@@ -12,6 +18,7 @@ export type LogDraft = {
   minutes: number
   notes: string
   status: MasteryStatus
+  source?: LogSource
 }
 
 const emptyStore: AppStore = { logs: [], settings: DEFAULT_SETTINGS }
@@ -51,6 +58,7 @@ export function useStudyStore() {
     const log: StudyLog = {
       id: newLogId(),
       ...draft,
+      source: draft.source ?? "manual",
       createdAt: now,
       updatedAt: now,
     }

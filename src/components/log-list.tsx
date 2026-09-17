@@ -129,6 +129,12 @@ export function LogList({ logs, today, onEdit, onDelete }: LogListProps) {
                       >
                         {STATUS_LABELS[log.status]}
                       </Badge>
+                      {log.source === "pomodoro" ? (
+                        <Badge variant="outline">Pomodoro</Badge>
+                      ) : null}
+                      {log.source === "preset" ? (
+                        <Badge variant="outline">Quick add</Badge>
+                      ) : null}
                     </div>
                     <p className="mt-1 text-xs text-muted-foreground">
                       {formatPrettyDate(log.date)}

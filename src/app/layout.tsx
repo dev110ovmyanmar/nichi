@@ -15,9 +15,9 @@ const geistMono = Geist_Mono({
 })
 
 export const metadata: Metadata = {
-  title: "Nichi — Daily study journal",
+  title: "Nichi — Study tracker",
   description:
-    "Log daily study sessions, keep a streak, and see weekly JLPT progress — saved on this device.",
+    "Log study sessions, run Pomodoros, keep a streak, and watch weekly progress until exam day.",
 }
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

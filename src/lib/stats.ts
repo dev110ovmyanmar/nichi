@@ -2,11 +2,28 @@ import {
   FALLBACK_SUBJECT_COLORS,
   SUBJECT_COLORS,
 } from "@/lib/constants"
-import { lastNDates, formatShortDay, todayISO, addDays } from "@/lib/dates"
-import type { DayMinutes, StudyLog, SubjectShare } from "@/lib/types"
+import {
+  lastNDates,
+  formatShortDay,
+  todayISO,
+  addDays,
+  startOfWeekSunday,
+} from "@/lib/dates"
+import type {
+  DayMinutes,
+  HeatmapCell,
+  HeatmapWeek,
+  StudyLog,
+  SubjectShare,
+} from "@/lib/types"
 
 export function totalMinutes(log: Pick<StudyLog, "hours" | "minutes">) {
   return log.hours * 60 + log.minutes
+}
+
+export function splitMinutes(total: number) {
+  const safe = Math.max(0, Math.round(total))
+  return { hours: Math.floor(safe / 60), minutes: safe % 60 }
 }
 
 export function formatDuration(minutes: number) {
@@ -38,7 +55,10 @@ export function weekTotalMinutes(logs: StudyLog[]) {
   return weekSeries(logs).reduce((sum, day) => sum + day.minutes, 0)
 }
 
-export function subjectBreakdown(logs: StudyLog[], dates: string[]): SubjectShare[] {
+export function subjectBreakdown(
+  logs: StudyLog[],
+  dates: string[]
+): SubjectShare[] {
   const dateSet = new Set(dates)
   const totals = new Map<string, number>()
 
@@ -94,4 +114,37 @@ export function longestStreak(logs: StudyLog[]) {
     }
   }
   return best
+}
+
+export function heatmapLevel(
+  minutes: number,
+  dailyGoalMinutes: number
+): HeatmapCell["level"] {
+  if (minutes <= 0) return 0
+  if (minutes < dailyGoalMinutes * 0.25) return 1
+  if (minutes < dailyGoalMinutes * 0.5) return 2
+  if (minutes < dailyGoalMinutes) return 3
+  return 4
+}
+
+export function activityHeatmap(
+  logs: StudyLog[],
+  weeks = 17,
+  dailyGoalMinutes = 120,
+  today = todayISO()
+): HeatmapWeek[] {
+  const weekStart = startOfWeekSunday(today)
+  const start = addDays(weekStart, -(weeks - 1) * 7)
+
+  return Array.from({ length: weeks }, (_, weekIndex) => ({
+    days: Array.from({ length: 7 }, (_, dayIndex) => {
+      const date = addDays(start, weekIndex * 7 + dayIndex)
+      const minutes = date > today ? 0 : minutesOnDate(logs, date)
+      return {
+        date,
+        minutes,
+        level: date > today ? 0 : heatmapLevel(minutes, dailyGoalMinutes),
+      }
+    }),
+  }))
 }

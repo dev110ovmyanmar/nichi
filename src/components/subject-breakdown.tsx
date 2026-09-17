@@ -23,7 +23,7 @@ export function SubjectBreakdown({ items }: SubjectBreakdownProps) {
       <CardHeader className="border-b">
         <CardTitle>Subject mix</CardTitle>
         <CardDescription>
-          How this week’s study time is split across topics
+          Donut view of this week’s time by tag
         </CardDescription>
       </CardHeader>
       <CardContent className="pt-4">

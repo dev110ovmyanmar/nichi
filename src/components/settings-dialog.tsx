@@ -1,7 +1,7 @@
 "use client"
 
-import { useState } from "react"
-import { BellRing, RotateCcw, Trash2 } from "lucide-react"
+import { useRef, useState } from "react"
+import { BellRing, Download, RotateCcw, Trash2, Upload } from "lucide-react"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import {
@@ -26,6 +26,8 @@ type SettingsDialogProps = {
   onUpdateSettings: (patch: Partial<AppSettings>) => void
   onRestoreSample: () => void
   onClearLogs: () => void
+  onExport: () => void
+  onImport: (file: File) => Promise<void> | void
 }
 
 function permissionLabel(permission: NotificationPermission | "unsupported") {
@@ -49,8 +51,11 @@ export function SettingsDialog({
   onUpdateSettings,
   onRestoreSample,
   onClearLogs,
+  onExport,
+  onImport,
 }: SettingsDialogProps) {
   const hydrated = useHydrated()
+  const fileRef = useRef<HTMLInputElement>(null)
   const [permissionOverride, setPermissionOverride] = useState<
     NotificationPermission | "unsupported" | null
   >(null)
@@ -92,12 +97,12 @@ export function SettingsDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Reminders & settings</DialogTitle>
+          <DialogTitle>Targets & reminders</DialogTitle>
           <DialogDescription>
-            A daily nudge, a time goal, and local data controls. Everything stays
-            on this device.
+            Daily goal, exam date, notifications, and JSON backup. Everything
+            stays on this device.
           </DialogDescription>
         </DialogHeader>
 
@@ -130,7 +135,7 @@ export function SettingsDialog({
               />
             </div>
             <div className="grid gap-1.5">
-              <Label htmlFor="daily-goal">Daily goal (minutes)</Label>
+              <Label htmlFor="daily-goal">Daily target (minutes)</Label>
               <Input
                 id="daily-goal"
                 type="number"
@@ -141,6 +146,30 @@ export function SettingsDialog({
                   onUpdateSettings({
                     dailyGoalMinutes: Number(event.target.value) || 0,
                   })
+                }
+              />
+            </div>
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="grid gap-1.5">
+              <Label htmlFor="exam-name">Exam name</Label>
+              <Input
+                id="exam-name"
+                value={settings.examName}
+                onChange={(event) =>
+                  onUpdateSettings({ examName: event.target.value })
+                }
+              />
+            </div>
+            <div className="grid gap-1.5">
+              <Label htmlFor="exam-date">Exam date</Label>
+              <Input
+                id="exam-date"
+                type="date"
+                value={settings.examDate}
+                onChange={(event) =>
+                  onUpdateSettings({ examDate: event.target.value })
                 }
               />
             </div>
@@ -173,6 +202,40 @@ export function SettingsDialog({
             </div>
           </div>
 
+          <div className="rounded-xl border px-3 py-3">
+            <p className="text-sm font-medium">Backup</p>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Export or import logs and settings as JSON
+            </p>
+            <div className="mt-3 flex flex-wrap gap-2">
+              <Button type="button" size="sm" variant="outline" onClick={onExport}>
+                <Download data-icon="inline-start" />
+                Export JSON
+              </Button>
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                onClick={() => fileRef.current?.click()}
+              >
+                <Upload data-icon="inline-start" />
+                Import JSON
+              </Button>
+              <input
+                ref={fileRef}
+                type="file"
+                accept="application/json,.json"
+                className="hidden"
+                onChange={async (event) => {
+                  const file = event.target.files?.[0]
+                  event.target.value = ""
+                  if (!file) return
+                  await onImport(file)
+                }}
+              />
+            </div>
+          </div>
+
           <div className="flex flex-wrap gap-2">
             <Button
               type="button"
@@ -180,11 +243,11 @@ export function SettingsDialog({
               size="sm"
               onClick={() => {
                 onRestoreSample()
-                toast.success("Sample week restored.")
+                toast.success("Sample history restored.")
               }}
             >
               <RotateCcw data-icon="inline-start" />
-              Restore sample week
+              Restore sample
             </Button>
             <Button
               type="button"
