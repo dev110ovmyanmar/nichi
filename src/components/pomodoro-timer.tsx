@@ -139,12 +139,12 @@ export function PomodoroTimer({
         </CardDescription>
       </CardHeader>
       <CardContent className="grid gap-4 pt-5">
-        <div className="flex flex-wrap gap-1.5">
+        <div className="flex gap-2 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] sm:flex-wrap sm:overflow-visible [&::-webkit-scrollbar]:hidden">
           {SUBJECTS.map((item) => (
             <Button
               key={item}
               type="button"
-              size="sm"
+              className="h-10 shrink-0 rounded-full"
               variant={subject === item ? "default" : "outline"}
               onClick={() => onSubjectChange(item)}
               disabled={running && mode === "focus"}
@@ -154,7 +154,7 @@ export function PomodoroTimer({
           ))}
         </div>
 
-        <div className="flex flex-col items-center gap-3 rounded-2xl border bg-muted/40 px-4 py-6">
+        <div className="flex flex-col items-center gap-3 rounded-2xl bg-secondary/60 px-4 py-6">
           <p className="text-xs font-medium tracking-[0.18em] text-muted-foreground uppercase">
             {mode === "focus" ? "Focus" : "Break"}
           </p>
@@ -172,23 +172,23 @@ export function PomodoroTimer({
           </div>
         </div>
 
-        <div className="flex flex-wrap justify-center gap-2">
+        <div className="grid grid-cols-3 gap-2 sm:flex sm:flex-wrap sm:justify-center">
           {running ? (
-            <Button type="button" onClick={pause}>
+            <Button type="button" className="h-11 col-span-3 sm:col-auto" onClick={pause}>
               <Pause data-icon="inline-start" />
               Pause
             </Button>
           ) : (
-            <Button type="button" onClick={start}>
+            <Button type="button" className="h-11 col-span-3 sm:col-auto" onClick={start}>
               <Play data-icon="inline-start" />
               {remaining === total ? "Start" : "Resume"}
             </Button>
           )}
-          <Button type="button" variant="outline" onClick={reset}>
+          <Button type="button" variant="outline" className="h-11" onClick={reset}>
             <RotateCcw data-icon="inline-start" />
             Reset
           </Button>
-          <Button type="button" variant="ghost" onClick={skip}>
+          <Button type="button" variant="ghost" className="h-11" onClick={skip}>
             <SkipForward data-icon="inline-start" />
             Skip
           </Button>

@@ -16,7 +16,7 @@ All data stays in the browser via `localStorage`. There is no account and no ser
 - **Pomodoro** — 25/5 timer that auto-logs a 25-minute session when a focus block finishes.
 - **Reminders** — daily time and message, in-app toast, optional browser notifications.
 - **Backup** — export and import JSON from settings.
-- **Theme** — light and dark, Linear/Notion-like layout, responsive.
+- **Theme** — cream paper light mode, navy-teal dark mode, and a mobile-first layout with sticky quick-add chips.
 
 ## Run locally
 

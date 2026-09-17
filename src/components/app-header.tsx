@@ -11,30 +11,32 @@ type AppHeaderProps = {
 
 export function AppHeader({ streak, onOpenSettings }: AppHeaderProps) {
   return (
-    <header className="sticky top-0 z-40 border-b border-border/80 bg-background/80 backdrop-blur-xl">
-      <div className="mx-auto flex h-16 w-full max-w-6xl items-center justify-between px-4 sm:px-6">
-        <div className="flex items-center gap-3">
-          <div className="flex size-9 items-center justify-center rounded-xl bg-primary text-sm font-semibold text-primary-foreground shadow-sm">
+    <header className="sticky top-0 z-40 border-b border-border/70 bg-background/85 backdrop-blur-xl">
+      <div className="mx-auto flex h-14 w-full max-w-6xl items-center justify-between px-4 sm:h-16 sm:px-6">
+        <div className="flex min-w-0 items-center gap-2.5">
+          <div className="flex size-8 items-center justify-center rounded-xl bg-primary text-sm font-semibold text-primary-foreground sm:size-9">
             日
           </div>
-          <div className="leading-tight">
+          <div className="min-w-0 leading-tight">
             <p className="font-heading text-sm font-semibold tracking-tight">
               Nichi
             </p>
-            <p className="text-xs text-muted-foreground">Daily study journal</p>
+            <p className="hidden text-xs text-muted-foreground sm:block">
+              Daily study journal
+            </p>
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
-          <div className="hidden items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1 text-xs font-medium sm:flex">
+        <div className="flex items-center gap-1.5 sm:gap-2">
+          <div className="flex items-center gap-1 rounded-full bg-secondary px-2.5 py-1 text-xs font-medium text-secondary-foreground">
             <Flame className="size-3.5 text-orange-500" />
             <span className="tabular-nums">{streak}</span>
-            <span className="text-muted-foreground">day streak</span>
           </div>
           <Button
             type="button"
             variant="outline"
             size="icon"
+            className="size-10"
             aria-label="Reminder settings"
             onClick={onOpenSettings}
           >

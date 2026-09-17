@@ -21,13 +21,13 @@ export function ExamCountdown({ examName, examDate }: ExamCountdownProps) {
           : `${Math.abs(remaining)} days ago`
 
   return (
-    <Card className="bg-card/80">
+    <Card className="bg-card/90">
       <CardContent className="flex items-start justify-between gap-3">
         <div>
           <p className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
-            Exam countdown
+            Exam
           </p>
-          <p className="mt-1 font-heading text-2xl font-semibold tracking-tight tabular-nums">
+          <p className="mt-1 font-heading text-xl font-semibold tracking-tight tabular-nums sm:text-2xl">
             {label}
           </p>
           <p className="mt-1 text-xs text-muted-foreground">

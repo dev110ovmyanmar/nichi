@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react"
 import { Check, RotateCcw } from "lucide-react"
-import { Button, buttonVariants } from "@/components/ui/button"
+import { Button } from "@/components/ui/button"
 import {
   Card,
   CardContent,
@@ -23,11 +23,10 @@ import type { LogDraft } from "@/hooks/use-study-store"
 const STATUS_OPTIONS: Array<{
   value: MasteryStatus
   label: string
-  hint: string
 }> = [
-  { value: "in_progress", label: "In progress", hint: "Still working through it" },
-  { value: "needs_review", label: "Needs review", hint: "Come back to this" },
-  { value: "completed", label: "Completed", hint: "Comfortable for now" },
+  { value: "in_progress", label: "In progress" },
+  { value: "needs_review", label: "Review" },
+  { value: "completed", label: "Done" },
 ]
 
 type StudyFormProps = {
@@ -69,6 +68,7 @@ export function StudyForm({ editing, onSubmit, onCancelEdit }: StudyFormProps) {
     editing && !knownSubjects.has(editing.subject) ? editing.subject : ""
   )
   const [error, setError] = useState<string | null>(null)
+  const [showCustomTime, setShowCustomTime] = useState(false)
 
   const usingCustom = !knownSubjects.has(draft.subject)
   const selectedMinutes = draft.hours * 60 + draft.minutes
@@ -87,7 +87,7 @@ export function StudyForm({ editing, onSubmit, onCancelEdit }: StudyFormProps) {
     if (logNow) {
       const subject = usingCustom ? customSubject.trim() : draft.subject
       if (!subject) {
-        setError("Pick a subject tag first.")
+        setError("Pick a subject first.")
         return
       }
       onSubmit({
@@ -99,7 +99,10 @@ export function StudyForm({ editing, onSubmit, onCancelEdit }: StudyFormProps) {
         source: "preset",
       })
       if (!editing) {
-        setDraft({ ...emptyDraft(), subject: knownSubjects.has(subject) ? subject : "Grammar" })
+        setDraft({
+          ...emptyDraft(),
+          subject: knownSubjects.has(subject) ? subject : "Grammar",
+        })
         setCustomSubject(knownSubjects.has(subject) ? "" : "")
       }
       setError(null)
@@ -123,7 +126,7 @@ export function StudyForm({ editing, onSubmit, onCancelEdit }: StudyFormProps) {
       return
     }
     if (hours * 60 + minutes < 1) {
-      setError("Add at least one minute of study time.")
+      setError("Add at least one minute.")
       return
     }
 
@@ -151,40 +154,63 @@ export function StudyForm({ editing, onSubmit, onCancelEdit }: StudyFormProps) {
     saveDraft()
   }
 
+  const presetButtons = (
+    <div className="grid grid-cols-3 gap-2">
+      {DURATION_PRESETS.map((minutes) => (
+        <Button
+          key={minutes}
+          type="button"
+          className="h-12 rounded-2xl text-base font-semibold md:h-11 md:rounded-xl md:text-sm"
+          variant="secondary"
+          onClick={() => applyPreset(minutes, !editing)}
+        >
+          {minutes === 60 ? "+1h" : `+${minutes}m`}
+        </Button>
+      ))}
+    </div>
+  )
+
   return (
-    <Card id="logger">
+    <Card id="logger" className="scroll-mt-20">
       <CardHeader className="border-b">
-        <CardTitle>
-          {editing ? "Edit session" : "Log today’s study"}
+        <CardTitle className="text-lg sm:text-base">
+          {editing ? "Edit session" : "Log study"}
         </CardTitle>
         <CardDescription>
-          Date, subject tag, duration, notes — or tap a preset to log instantly
+          Tap a time chip to save. Custom hours are optional.
         </CardDescription>
       </CardHeader>
       <CardContent>
         <form className="grid gap-4" onSubmit={handleSubmit} noValidate>
-          <div className="grid gap-1.5">
-            <Label htmlFor="study-date">Date</Label>
-            <Input
-              id="study-date"
-              type="date"
-              value={draft.date}
-              max={todayISO()}
-              onChange={(event) => update("date", event.target.value)}
-              required
-            />
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div className="grid gap-1.5">
+              <Label htmlFor="study-date">Date</Label>
+              <Input
+                id="study-date"
+                type="date"
+                value={draft.date}
+                max={todayISO()}
+                onChange={(event) => update("date", event.target.value)}
+                required
+              />
+            </div>
+            <div className="hidden items-end sm:flex">
+              <p className="pb-2 text-xs text-muted-foreground tabular-nums">
+                {formatDuration(selectedMinutes)} selected
+              </p>
+            </div>
           </div>
 
           <div className="grid gap-2">
-            <Label>Subject tag</Label>
-            <div className="flex flex-wrap gap-1.5">
+            <Label>Subject</Label>
+            <div className="flex gap-2 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] sm:flex-wrap sm:overflow-visible [&::-webkit-scrollbar]:hidden">
               {SUBJECTS.map((subject) => {
                 const active = draft.subject === subject
                 return (
                   <Button
                     key={subject}
                     type="button"
-                    size="sm"
+                    className="h-10 min-h-10 shrink-0 rounded-full px-3.5"
                     variant={active ? "default" : "outline"}
                     onClick={() => setSubject(subject)}
                   >
@@ -192,20 +218,10 @@ export function StudyForm({ editing, onSubmit, onCancelEdit }: StudyFormProps) {
                   </Button>
                 )
               })}
-              <Button
-                type="button"
-                size="sm"
-                variant={usingCustom ? "default" : "outline"}
-                onClick={() => {
-                  update("subject", customSubject || "")
-                }}
-              >
-                Custom
-              </Button>
             </div>
             {usingCustom ? (
               <Input
-                placeholder="e.g. Keigo, pitch accent"
+                placeholder="Custom topic"
                 value={customSubject}
                 onChange={(event) => {
                   setCustomSubject(event.target.value)
@@ -216,35 +232,40 @@ export function StudyForm({ editing, onSubmit, onCancelEdit }: StudyFormProps) {
           </div>
 
           <div className="grid gap-2">
-            <div className="flex items-center justify-between gap-2">
-              <Label>Duration</Label>
-              <span className="text-xs text-muted-foreground tabular-nums">
+            <div className="flex items-center justify-between">
+              <Label>Quick log</Label>
+              <span className="text-xs text-muted-foreground tabular-nums sm:hidden">
                 {formatDuration(selectedMinutes)}
               </span>
             </div>
-            <div className="flex flex-wrap gap-1.5">
-              {DURATION_PRESETS.map((minutes) => (
-                <Button
-                  key={minutes}
-                  type="button"
-                  size="sm"
-                  variant="outline"
-                  onClick={() => applyPreset(minutes, !editing)}
-                >
-                  {minutes === 60 ? "+1h" : `+${minutes}m`}
-                </Button>
-              ))}
+            <div className="hidden md:block">{presetButtons}</div>
+            <div className="flex items-center justify-between md:hidden">
+              <button
+                type="button"
+                onClick={() => setShowCustomTime((open) => !open)}
+                className="min-h-11 text-sm font-medium text-muted-foreground"
+              >
+                {showCustomTime ? "Hide custom time" : "Custom time"}
+              </button>
+              <button
+                type="button"
+                onClick={saveDraft}
+                className="min-h-11 text-sm font-semibold text-primary"
+              >
+                Save {formatDuration(selectedMinutes)}
+              </button>
             </div>
-            <p className="text-xs text-muted-foreground">
-              {editing
-                ? "Presets fill the duration fields. Save when you are done."
-                : "Tap +15m / +30m / +1h to log immediately, or set a custom time and press Add session."}
-            </p>
-            <div className="grid gap-4 sm:grid-cols-2">
+            <div
+              className={cn(
+                "grid-cols-2 gap-3 md:grid",
+                showCustomTime ? "grid" : "hidden"
+              )}
+            >
               <div className="grid gap-1.5">
                 <Label htmlFor="study-hours">Hours</Label>
                 <Input
                   id="study-hours"
+                  inputMode="numeric"
                   type="number"
                   min={0}
                   max={12}
@@ -258,6 +279,7 @@ export function StudyForm({ editing, onSubmit, onCancelEdit }: StudyFormProps) {
                 <Label htmlFor="study-minutes">Minutes</Label>
                 <Input
                   id="study-minutes"
+                  inputMode="numeric"
                   type="number"
                   min={0}
                   max={59}
@@ -271,26 +293,26 @@ export function StudyForm({ editing, onSubmit, onCancelEdit }: StudyFormProps) {
             <button
               type="button"
               onClick={saveDraft}
-              className={cn(buttonVariants({ size: "lg" }), "w-full sm:w-auto")}
+              className="hidden min-h-11 text-left text-sm font-semibold text-primary md:inline"
             >
-              <Check data-icon="inline-start" />
-              {editing ? "Save changes" : "Add session"}
+              Save {formatDuration(selectedMinutes)}
             </button>
           </div>
 
           <div className="grid gap-1.5">
-            <Label htmlFor="study-notes">Notes / key takeaways</Label>
+            <Label htmlFor="study-notes">Notes</Label>
             <Textarea
               id="study-notes"
-              placeholder="What clicked? What still needs another pass?"
+              placeholder="What clicked today?"
+              className="min-h-20"
               value={draft.notes}
               onChange={(event) => update("notes", event.target.value)}
             />
           </div>
 
           <div className="grid gap-2">
-            <Label>Mastery</Label>
-            <div className="grid gap-2 sm:grid-cols-3">
+            <Label>Status</Label>
+            <div className="grid grid-cols-3 gap-2">
               {STATUS_OPTIONS.map((option) => {
                 const active = draft.status === option.value
                 return (
@@ -299,23 +321,13 @@ export function StudyForm({ editing, onSubmit, onCancelEdit }: StudyFormProps) {
                     type="button"
                     onClick={() => update("status", option.value)}
                     className={cn(
-                      "rounded-xl border px-3 py-2 text-left transition-colors",
+                      "h-10 rounded-full border text-sm font-medium transition-colors",
                       active
-                        ? "border-foreground/20 bg-foreground text-background"
-                        : "border-border bg-background hover:bg-muted"
+                        ? "border-primary bg-primary text-primary-foreground"
+                        : "border-border bg-background text-muted-foreground"
                     )}
                   >
-                    <span className="block text-sm font-medium">
-                      {option.label}
-                    </span>
-                    <span
-                      className={cn(
-                        "mt-0.5 block text-xs",
-                        active ? "text-background/70" : "text-muted-foreground"
-                      )}
-                    >
-                      {option.hint}
-                    </span>
+                    {option.label}
                   </button>
                 )
               })}
@@ -324,24 +336,45 @@ export function StudyForm({ editing, onSubmit, onCancelEdit }: StudyFormProps) {
 
           {error ? <p className="text-sm text-destructive">{error}</p> : null}
 
-          <div className="flex flex-wrap gap-2">
-            <button
-              type="button"
-              onClick={saveDraft}
-              className={buttonVariants()}
-            >
-              <Check data-icon="inline-start" />
-              {editing ? "Save changes" : "Add session"}
-            </button>
-            {editing ? (
-              <Button type="button" variant="outline" onClick={onCancelEdit}>
+          {editing ? (
+            <div className="hidden gap-2 md:flex">
+              <Button type="button" className="h-11 flex-1" onClick={saveDraft}>
+                <Check data-icon="inline-start" />
+                Save
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                className="h-11"
+                onClick={onCancelEdit}
+              >
                 <RotateCcw data-icon="inline-start" />
                 Cancel
               </Button>
-            ) : null}
-          </div>
+            </div>
+          ) : null}
         </form>
       </CardContent>
+
+      <div className="fixed inset-x-0 bottom-0 z-50 border-t border-border/70 bg-background/90 px-4 pt-3 shadow-[0_-8px_24px_oklch(0.28_0.035_250/0.08)] backdrop-blur-xl pb-[max(0.85rem,env(safe-area-inset-bottom))] md:hidden">
+        {editing ? (
+          <div className="mx-auto flex max-w-6xl gap-2">
+            <Button type="button" className="h-12 flex-1 rounded-2xl" onClick={saveDraft}>
+              Save
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              className="h-12 rounded-2xl"
+              onClick={onCancelEdit}
+            >
+              Cancel
+            </Button>
+          </div>
+        ) : (
+          <div className="mx-auto max-w-6xl">{presetButtons}</div>
+        )}
+      </div>
     </Card>
   )
 }

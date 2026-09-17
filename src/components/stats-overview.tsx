@@ -31,15 +31,15 @@ export function StatsOverview({
       : Math.min(100, Math.round((todayMinutes / dailyGoalMinutes) * 100))
 
   return (
-    <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-      <Card className="bg-card/80 md:col-span-2 xl:col-span-1">
+    <div className="grid grid-cols-2 gap-2 sm:gap-3 xl:grid-cols-4">
+      <Card className="col-span-2 bg-card/90 xl:col-span-1">
         <CardContent>
           <div className="mb-3 flex items-start justify-between gap-3">
             <div>
               <p className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
                 Daily target
               </p>
-              <p className="mt-1 font-heading text-2xl font-semibold tracking-tight tabular-nums">
+              <p className="mt-1 font-heading text-xl font-semibold tracking-tight tabular-nums sm:text-2xl">
                 {goalPercent}%
               </p>
             </div>
@@ -55,13 +55,13 @@ export function StatsOverview({
         </CardContent>
       </Card>
 
-      <Card className="bg-card/80">
+      <Card className="bg-card/90">
         <CardContent className="flex items-start justify-between gap-3">
           <div>
             <p className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
               Streak
             </p>
-            <p className="mt-1 font-heading text-2xl font-semibold tracking-tight tabular-nums">
+            <p className="mt-1 font-heading text-xl font-semibold tracking-tight tabular-nums sm:text-2xl">
               {streak} day{streak === 1 ? "" : "s"}
             </p>
             <p className="mt-1 text-xs text-muted-foreground">
@@ -78,13 +78,13 @@ export function StatsOverview({
 
       <ExamCountdown examName={examName} examDate={examDate} />
 
-      <Card className="bg-card/80">
+      <Card className="bg-card/90">
         <CardContent className="flex items-start justify-between gap-3">
           <div>
             <p className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
               This week
             </p>
-            <p className="mt-1 font-heading text-2xl font-semibold tracking-tight tabular-nums">
+            <p className="mt-1 font-heading text-xl font-semibold tracking-tight tabular-nums sm:text-2xl">
               {formatDuration(weekMinutes)}
             </p>
             <p className="mt-1 text-xs text-muted-foreground">

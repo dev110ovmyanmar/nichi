@@ -37,9 +37,9 @@ export function WeeklyChart({ series, totalMinutes }: WeeklyChartProps) {
         </CardDescription>
       </CardHeader>
       <CardContent className="pt-4">
-        <div className="h-56 w-full sm:h-64">
+        <div className="h-48 w-full sm:h-64">
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={series} barSize={28}>
+            <BarChart data={series} barSize={22}>
               <CartesianGrid
                 vertical={false}
                 stroke="var(--border)"

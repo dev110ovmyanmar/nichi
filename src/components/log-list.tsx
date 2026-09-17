@@ -82,12 +82,12 @@ export function LogList({ logs, today, onEdit, onDelete }: LogListProps) {
               className="pl-8"
             />
           </div>
-          <div className="flex flex-wrap gap-1.5">
+          <div className="flex gap-1.5 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             {FILTERS.map((item) => (
               <Button
                 key={item.value}
                 type="button"
-                size="sm"
+                className="h-9 shrink-0 rounded-full"
                 variant={filter === item.value ? "default" : "outline"}
                 onClick={() => setFilter(item.value)}
               >
@@ -103,7 +103,7 @@ export function LogList({ logs, today, onEdit, onDelete }: LogListProps) {
             <p className="text-sm font-medium">No matching sessions</p>
             <p className="max-w-sm text-xs text-muted-foreground">
               {logs.length === 0
-                ? "Add your first session to start a streak and fill the weekly chart."
+                ? "Tap +15m at the bottom to start a streak and fill the weekly chart."
                 : "Try another filter or search term."}
             </p>
           </div>
@@ -150,8 +150,9 @@ export function LogList({ logs, today, onEdit, onDelete }: LogListProps) {
                   <div className="flex shrink-0 gap-1">
                     <Button
                       type="button"
-                      size="icon-sm"
+                      size="icon"
                       variant="ghost"
+                      className="size-10"
                       aria-label={`Edit ${log.subject}`}
                       onClick={() => onEdit(log)}
                     >
@@ -159,8 +160,9 @@ export function LogList({ logs, today, onEdit, onDelete }: LogListProps) {
                     </Button>
                     <Button
                       type="button"
-                      size="icon-sm"
+                      size="icon"
                       variant="ghost"
+                      className="size-10"
                       aria-label={`Delete ${log.subject}`}
                       onClick={() => setPendingDelete(log)}
                     >

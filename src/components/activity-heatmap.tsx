@@ -16,10 +16,10 @@ const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
 
 const LEVEL_CLASS: Record<0 | 1 | 2 | 3 | 4, string> = {
   0: "bg-muted",
-  1: "bg-emerald-200 dark:bg-emerald-950",
-  2: "bg-emerald-300 dark:bg-emerald-800",
-  3: "bg-emerald-500 dark:bg-emerald-600",
-  4: "bg-emerald-700 dark:bg-emerald-400",
+  1: "bg-primary/20",
+  2: "bg-primary/40",
+  3: "bg-primary/70",
+  4: "bg-primary",
 }
 
 type ActivityHeatmapProps = {
@@ -45,7 +45,7 @@ export function ActivityHeatmap({ weeks }: ActivityHeatmapProps) {
         </CardDescription>
       </CardHeader>
       <CardContent className="overflow-x-auto pt-4">
-        <div className="min-w-[640px]">
+        <div className="min-w-[560px]">
           <div
             className="mb-2 grid gap-1 text-[10px] text-muted-foreground"
             style={{
