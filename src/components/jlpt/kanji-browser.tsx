@@ -5,7 +5,6 @@ import Link from "next/link"
 import { Search } from "lucide-react"
 import { ChapterList } from "@/components/jlpt/chapter-list"
 import { BookmarkButton } from "@/components/jlpt/ruby-word"
-import { SourceCredits } from "@/components/jlpt/source-credits"
 import { Input } from "@/components/ui/input"
 import { SOUMATOME_KANJI_WEEKS } from "@/data/soumatome-kanji"
 import { useJlptProgress } from "@/hooks/use-jlpt-progress"
@@ -130,7 +129,6 @@ export function KanjiBrowser() {
           )}
         </>
       )}
-      <SourceCredits />
     </div>
   )
 }

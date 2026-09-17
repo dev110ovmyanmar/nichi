@@ -8,7 +8,6 @@ import { BookmarkButton, RubyWord } from "@/components/jlpt/ruby-word"
 import { PosTags } from "@/components/jlpt/sentence"
 import { tangoChapter } from "@/data/books"
 import { SOUMATOME_GOI_BOOK } from "@/data/sources"
-import { SourceCredits } from "@/components/jlpt/source-credits"
 import { chapterUnitLabel, isPracticeSection, sectionUnitLabel } from "@/lib/jlpt/labels"
 import { useJlptProgress } from "@/hooks/use-jlpt-progress"
 import { displayMeaning } from "@/lib/jlpt/burmese"
@@ -145,7 +144,6 @@ export default function TangoChapterPage({
           )
         })
       )}
-      <SourceCredits compact book="goi" />
     </div>
   )
 }

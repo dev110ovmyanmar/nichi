@@ -8,7 +8,6 @@ import { BookmarkButton, RubyWord } from "@/components/jlpt/ruby-word"
 import { FuriganaSentence, PosTags } from "@/components/jlpt/sentence"
 import { tangoChapter } from "@/data/books"
 import { SOUMATOME_GOI_BOOK } from "@/data/sources"
-import { SourceCite, SourceCredits } from "@/components/jlpt/source-credits"
 import { chapterUnitLabel, sectionUnitLabel } from "@/lib/jlpt/labels"
 import { Button } from "@/components/ui/button"
 import { useJlptProgress } from "@/hooks/use-jlpt-progress"
@@ -84,10 +83,7 @@ export default function VocabDetailPage({
           <li key={meaning}>· {meaning}</li>
         ))}
       </ul>
-      <div className="flex items-baseline justify-between gap-2">
-        <p className="text-sm font-medium">例文</p>
-        <SourceCite id="tatoeba" book="goi" />
-      </div>
+      <p className="text-sm font-medium">例文</p>
       {(item.examples ?? []).map((example) => (
         <figure key={example.ja} className="rounded-3xl bg-card p-4 ring-1 ring-foreground/8">
           <blockquote className="text-lg">
@@ -124,7 +120,6 @@ export default function VocabDetailPage({
           </Link>
         ) : null}
       </div>
-      <SourceCredits compact book="goi" />
     </div>
   )
 }

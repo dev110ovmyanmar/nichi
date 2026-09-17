@@ -7,7 +7,6 @@ import { ModuleHero } from "@/components/jlpt/module-hero"
 import { KanjiStroke } from "@/components/jlpt/kanji-stroke"
 import { BookmarkButton } from "@/components/jlpt/ruby-word"
 import { FuriganaSentence } from "@/components/jlpt/sentence"
-import { SourceCite, SourceCredits } from "@/components/jlpt/source-credits"
 import { soumatomeKanjiWeek } from "@/data/books"
 import { SOUMATOME_KANJI_BOOK } from "@/data/sources"
 import { useJlptProgress } from "@/hooks/use-jlpt-progress"
@@ -107,16 +106,10 @@ export default function KanjiDetailPage({
             {section ? ` · ${sectionUnitLabel(chapter, section)} ${section.titleJa}` : ""}
           </p>
         ) : null}
-        <p className="pt-1">
-          <SourceCite id="kanjidic2" />
-        </p>
       </div>
       <KanjiStroke character={item.character} />
       <section>
-        <div className="flex items-baseline justify-between gap-2">
-          <h2 className="font-heading text-base font-semibold">例文</h2>
-          <SourceCite id="tatoeba" />
-        </div>
+        <h2 className="font-heading text-base font-semibold">例文</h2>
         <div className="mt-2 grid gap-2">
           {(item.examples?.length ? item.examples : []).slice(0, 3).map((example) => (
             <figure key={example.ja} className="rounded-3xl bg-card p-4 ring-1 ring-foreground/8">
@@ -172,7 +165,6 @@ export default function KanjiDetailPage({
           </Link>
         ) : null}
       </div>
-      <SourceCredits compact />
     </div>
   )
 }

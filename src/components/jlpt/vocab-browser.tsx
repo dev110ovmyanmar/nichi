@@ -9,7 +9,6 @@ import { AudioPlayer } from "@/components/jlpt/audio-player"
 import { PosTags } from "@/components/jlpt/sentence"
 import { Input } from "@/components/ui/input"
 import { SOUMATOME_GOI_WEEKS } from "@/data/soumatome-goi"
-import { SourceCredits } from "@/components/jlpt/source-credits"
 import { useJlptProgress } from "@/hooks/use-jlpt-progress"
 import { KANA_ROWS, loadVocab, matchesKanaRow } from "@/lib/jlpt/catalog"
 import { displayMeaning } from "@/lib/jlpt/burmese"
@@ -208,7 +207,6 @@ export function VocabBrowser() {
           ) : null}
         </>
       )}
-      <SourceCredits book="goi" />
     </div>
   )
 }

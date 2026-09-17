@@ -4,7 +4,6 @@ import { use, useEffect, useMemo, useState } from "react"
 import Link from "next/link"
 import { ModuleHero } from "@/components/jlpt/module-hero"
 import { BookmarkButton } from "@/components/jlpt/ruby-word"
-import { SourceCredits } from "@/components/jlpt/source-credits"
 import { soumatomeKanjiWeek } from "@/data/books"
 import { SOUMATOME_KANJI_BOOK } from "@/data/sources"
 import { useJlptProgress } from "@/hooks/use-jlpt-progress"
@@ -133,7 +132,6 @@ export default function KanjiChapterPage({
           )
         })
       )}
-      <SourceCredits compact />
     </div>
   )
 }
