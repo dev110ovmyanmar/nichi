@@ -33,7 +33,16 @@ npm start
 
 TypeScript interfaces live in `src/lib/jlpt/types.ts`. Curriculum chapters are in `src/data/books.ts` (`chapterId` / `sectionId`). OpenJLPT JSON in `public/data/` is assigned into those chapters at load time (`src/lib/jlpt/curriculum.ts`).
 
-Progress (bookmarks, known items, completed chapters, quiz history) is stored in `localStorage` key `nichi.jlpt-progress.v1` and mirrored to IndexedDB (`nichi-n2`). The study journal uses `nichi.study-store.v2`.
+## Kanji Master PDF ingest
+
+If you have `kanji_master_n2.pdf`, extract chapter / section / kanji / 音訓 / 熟語 / 例文 **one page at a time** into SQLite (optional JSONL):
+
+```bash
+pip install -r scripts/requirements-ingest.txt
+python scripts/ingest_kanji_master.py --pdf kanji_master_n2.pdf --db kanji_n2.db --jsonl kanji_n2.jsonl
+```
+
+The script prints `Processing page X of Y...`, never loads the whole PDF into RAM, and writes each entry as it goes. Place the PDF next to the command, or pass `--pdf`. Extracted textbook text stays local (`kanji_n2.db` is gitignored).
 
 ## Data & licenses
 

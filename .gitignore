@@ -36,6 +36,10 @@ yarn-error.log*
 # vercel
 .vercel
 
-# typescript
-*.tsbuildinfo
-next-env.d.ts
+# ingest outputs
+kanji_n2.db
+*.db-wal
+*.db-shm
+kanji_n2.jsonl
+kanji_master_n2.pdf
+
