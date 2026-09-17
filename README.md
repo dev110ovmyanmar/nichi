@@ -43,3 +43,4 @@ TypeScript interfaces live in `src/lib/jlpt/types.ts`. Vocab weeks are in `src/d
 - Vocab/kanji JSON in `public/data/` is derived from [OpenJLPT](https://github.com/evanclan/OpenJLPT) (CC BY-SA 4.0). See `public/data/ATTRIBUTION.md`.
 - Burmese grammar notes, reading passages, listening scripts, mock-exam copy, and the week/day *shells* are original Nichi content.
 - Audio uses the browser `speechSynthesis` Japanese voice when available.
+# nichi
