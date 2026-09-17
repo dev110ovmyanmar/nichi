@@ -5,8 +5,9 @@ import Link from "next/link"
 import { Search } from "lucide-react"
 import { ChapterList } from "@/components/jlpt/chapter-list"
 import { BookmarkButton } from "@/components/jlpt/ruby-word"
+import { SourceCredits } from "@/components/jlpt/source-credits"
 import { Input } from "@/components/ui/input"
-import { KANJI_MASTER_CHAPTERS } from "@/data/books"
+import { SOUMATOME_KANJI_WEEKS } from "@/data/soumatome-kanji"
 import { useJlptProgress } from "@/hooks/use-jlpt-progress"
 import { loadKanji } from "@/lib/jlpt/catalog"
 import { displayMeaning } from "@/lib/jlpt/burmese"
@@ -18,7 +19,7 @@ import { cn } from "@/lib/utils"
 export function KanjiBrowser() {
   const [items, setItems] = useState<KanjiEntry[] | null>(null)
   const [query, setQuery] = useState("")
-  const [tab, setTab] = useState<"chapters" | "index">("chapters")
+  const [tab, setTab] = useState<"weeks" | "index">("weeks")
   const { progress, toggleBookmark } = useJlptProgress()
 
   useEffect(() => {
@@ -29,7 +30,7 @@ export function KanjiBrowser() {
     const total: Record<string, number> = {}
     const known: Record<string, number> = {}
     if (!items) return { total, known }
-    for (const chapter of KANJI_MASTER_CHAPTERS) {
+    for (const chapter of SOUMATOME_KANJI_WEEKS) {
       const stats = chapterProgress(items, chapter.id, progress.knownKanji)
       total[chapter.id] = stats.total
       known[chapter.id] = stats.known
@@ -55,13 +56,13 @@ export function KanjiBrowser() {
       <div className="flex gap-2">
         <button
           type="button"
-          onClick={() => setTab("chapters")}
+          onClick={() => setTab("weeks")}
           className={cn(
             "h-9 rounded-full px-3 text-sm",
-            tab === "chapters" ? "bg-primary text-primary-foreground" : "bg-muted"
+            tab === "weeks" ? "bg-primary text-primary-foreground" : "bg-muted"
           )}
         >
-          Kanji Master အခန်းများ
+          ８週
         </button>
         <button
           type="button"
@@ -75,10 +76,10 @@ export function KanjiBrowser() {
         </button>
       </div>
 
-      {tab === "chapters" ? (
+      {tab === "weeks" ? (
         items ? (
           <ChapterList
-            chapters={KANJI_MASTER_CHAPTERS}
+            chapters={SOUMATOME_KANJI_WEEKS}
             hrefFor={(id) => `/kanji/ch/${id}`}
             counts={counts.total}
             known={counts.known}
@@ -129,6 +130,7 @@ export function KanjiBrowser() {
           )}
         </>
       )}
+      <SourceCredits />
     </div>
   )
 }

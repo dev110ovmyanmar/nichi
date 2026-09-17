@@ -3,9 +3,10 @@
 import { use, useEffect, useMemo, useState } from "react"
 import { ChapterQuiz } from "@/components/jlpt/chapter-quiz"
 import { ModuleHero } from "@/components/jlpt/module-hero"
-import { kanjiMasterChapter } from "@/data/books"
+import { soumatomeKanjiWeek } from "@/data/books"
 import { loadKanji } from "@/lib/jlpt/catalog"
 import { itemsInChapter } from "@/lib/jlpt/curriculum"
+import { chapterUnitLabel } from "@/lib/jlpt/labels"
 import { kanjiQuiz } from "@/lib/jlpt/quiz"
 import type { KanjiEntry } from "@/lib/jlpt/types"
 
@@ -15,7 +16,7 @@ export default function KanjiQuizPage({
   params: Promise<{ chapterId: string }>
 }) {
   const { chapterId } = use(params)
-  const chapter = kanjiMasterChapter(chapterId)
+  const chapter = soumatomeKanjiWeek(chapterId)
   const [items, setItems] = useState<KanjiEntry[] | null>(null)
 
   useEffect(() => {
@@ -27,15 +28,15 @@ export default function KanjiQuizPage({
     return kanjiQuiz(itemsInChapter(items, chapterId))
   }, [items, chapterId])
 
-  if (!chapter) return <p>အခန်း မတွေ့ပါ။</p>
+  if (!chapter) return <p>အပတ် မတွေ့ပါ။</p>
 
   return (
     <div>
       <ModuleHero
         backHref={`/kanji/ch/${chapter.id}`}
-        kicker={`第${chapter.number}章 quiz`}
+        kicker={`${chapterUnitLabel(chapter)} 実戦問題`}
         title={chapter.titleJa}
-        description="အဓိပ္ပာယ်၊ 音読み၊ 星問題 熟語။ ၇၀% အထက် ရရင် အခန်း ပြီးဆုံး မှတ်သည်။"
+        description="အဓိပ္ပာယ်၊ 音読み၊ 星問題 熟語။ ၇၀% အထက် ရရင် ဤအပတ် ပြီးဆုံး မှတ်သည်။"
       />
       {items ? (
         <ChapterQuiz

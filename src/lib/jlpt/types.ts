@@ -53,13 +53,15 @@ export type CurriculumSection = {
 
 export type CurriculumChapter = {
   id: string
-  book: "tango" | "kanji-master"
+  book: "tango" | "kanji-master" | "soumatome-kanji"
   number: number
   titleJa: string
   titleMy: string
   summaryMy: string
   radical?: string
   radicalMy?: string
+  unitJa?: "章" | "週"
+  sectionUnitJa?: "節" | "日目"
   sections: CurriculumSection[]
 }
 

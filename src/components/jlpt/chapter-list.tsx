@@ -1,6 +1,7 @@
 "use client"
 
 import Link from "next/link"
+import { chapterUnitLabel } from "@/lib/jlpt/labels"
 import type { CurriculumChapter } from "@/lib/jlpt/types"
 import { cn } from "@/lib/utils"
 
@@ -33,7 +34,7 @@ export function ChapterList({
             <div className="flex items-start justify-between gap-3">
               <div>
                 <p className="text-[11px] font-medium tracking-[0.14em] text-muted-foreground uppercase">
-                  第{chapter.number}章
+                  {chapterUnitLabel(chapter)}
                   {isDone ? " · 完了" : ""}
                 </p>
                 <p className="font-heading mt-0.5 text-lg font-semibold">{chapter.titleJa}</p>

@@ -1,4 +1,5 @@
-import { KANJI_MASTER_CHAPTERS, TANGO_CHAPTERS } from "@/data/books"
+import { TANGO_CHAPTERS } from "@/data/books"
+import { SOUMATOME_KANJI_WEEKS } from "@/data/soumatome-kanji"
 import type {
   CurriculumChapter,
   ExampleSentence,
@@ -40,14 +41,21 @@ function scoreKeywords(text: string, keywords: string[]) {
   return score
 }
 
+function studySections(chapter: CurriculumChapter) {
+  const withKeywords = chapter.sections.filter((section) => section.keywords.length > 0)
+  return withKeywords.length ? withKeywords : chapter.sections
+}
+
 function bestSlot(text: string, chapters: CurriculumChapter[]) {
+  const last = chapters[chapters.length - 1]
+  const lastStudy = studySections(last).at(-1)!
   let best = {
-    chapterId: chapters[chapters.length - 1].id,
-    sectionId: chapters[chapters.length - 1].sections.at(-1)!.id,
+    chapterId: last.id,
+    sectionId: lastStudy.id,
     score: 0,
   }
   for (const chapter of chapters) {
-    for (const section of chapter.sections) {
+    for (const section of studySections(chapter)) {
       const score = scoreKeywords(text, section.keywords)
       if (score > best.score) {
         best = { chapterId: chapter.id, sectionId: section.id, score }
@@ -169,20 +177,16 @@ export function assignKanji(raw: RawKanji[], vocab: VocabEntry[]): KanjiEntry[] 
   const counts: Record<string, number> = {}
   return raw.map((item) => {
     const text = blob([item.character, ...item.onyomi, ...item.kunyomi, ...item.meanings])
-    let slot = bestSlot(text, KANJI_MASTER_CHAPTERS)
+    let slot = bestSlot(text, SOUMATOME_KANJI_WEEKS)
     if (slot.score === 0) {
-      const chapter =
-        item.strokes <= 7
-          ? KANJI_MASTER_CHAPTERS[0]
-          : item.strokes <= 10
-            ? KANJI_MASTER_CHAPTERS[5]
-            : item.strokes <= 13
-              ? KANJI_MASTER_CHAPTERS[8]
-              : KANJI_MASTER_CHAPTERS[15]
-      const section = chapter.sections[item.strokes % 2]
+      const weekIndex =
+        item.strokes <= 7 ? 0 : item.strokes <= 10 ? 2 : item.strokes <= 13 ? 4 : 6
+      const chapter = SOUMATOME_KANJI_WEEKS[weekIndex] ?? SOUMATOME_KANJI_WEEKS[7]
+      const days = studySections(chapter)
+      const section = days[item.strokes % days.length]
       slot = { chapterId: chapter.id, sectionId: section.id, score: 0 }
     }
-    const chapter = KANJI_MASTER_CHAPTERS.find((entry) => entry.id === slot.chapterId)
+    const chapter = SOUMATOME_KANJI_WEEKS.find((entry) => entry.id === slot.chapterId)
     const related = vocab.filter((word) => word.word.includes(item.character)).slice(0, 4)
     const examples: ExampleSentence[] =
       item.examples?.length

@@ -7,11 +7,14 @@ import { ModuleHero } from "@/components/jlpt/module-hero"
 import { KanjiStroke } from "@/components/jlpt/kanji-stroke"
 import { BookmarkButton } from "@/components/jlpt/ruby-word"
 import { FuriganaSentence } from "@/components/jlpt/sentence"
-import { kanjiMasterChapter } from "@/data/books"
+import { SourceCite, SourceCredits } from "@/components/jlpt/source-credits"
+import { soumatomeKanjiWeek } from "@/data/books"
+import { SOUMATOME_KANJI_BOOK } from "@/data/sources"
 import { useJlptProgress } from "@/hooks/use-jlpt-progress"
 import { displayMeaning } from "@/lib/jlpt/burmese"
 import { loadKanji, loadVocab } from "@/lib/jlpt/catalog"
 import { entryHref, findById } from "@/lib/jlpt/ids"
+import { chapterUnitLabel, sectionUnitLabel } from "@/lib/jlpt/labels"
 import type { KanjiEntry, VocabEntry } from "@/lib/jlpt/types"
 
 export default function KanjiDetailPage({
@@ -55,7 +58,7 @@ export default function KanjiDetailPage({
   if (item === undefined) return <p className="text-sm text-muted-foreground">ခေါ်ယူနေသည်…</p>
   if (!item) return <p>မတွေ့ပါ။</p>
 
-  const chapter = kanjiMasterChapter(item.chapterId)
+  const chapter = soumatomeKanjiWeek(item.chapterId)
   const section = chapter?.sections.find((entry) => entry.id === item.sectionId)
   const speakText = item.onyomi[0] || item.kunyomi[0] || item.character
 
@@ -63,7 +66,7 @@ export default function KanjiDetailPage({
     <div className="grid gap-5">
       <ModuleHero
         backHref={chapter ? `/kanji/ch/${chapter.id}` : "/kanji"}
-        kicker="漢字 · Kanji Master"
+        kicker={`漢字 · ${SOUMATOME_KANJI_BOOK.title}`}
         title={item.character}
         description={meaning}
       />
@@ -96,14 +99,20 @@ export default function KanjiDetailPage({
         {chapter ? (
           <p>
             <span className="text-muted-foreground">課程 · </span>
-            第{chapter.number}章 {chapter.titleJa}
-            {section ? ` · ${section.titleJa}` : ""}
+            {chapterUnitLabel(chapter)} {chapter.titleJa}
+            {section ? ` · ${sectionUnitLabel(chapter, section)} ${section.titleJa}` : ""}
           </p>
         ) : null}
+        <p className="pt-1">
+          <SourceCite id="kanjidic2" />
+        </p>
       </div>
       <KanjiStroke character={item.character} />
       <section>
-        <h2 className="font-heading text-base font-semibold">例文</h2>
+        <div className="flex items-baseline justify-between gap-2">
+          <h2 className="font-heading text-base font-semibold">例文</h2>
+          <SourceCite id="tatoeba" />
+        </div>
         <div className="mt-2 grid gap-2">
           {(item.examples?.length ? item.examples : []).slice(0, 3).map((example) => (
             <figure key={example.ja} className="rounded-3xl bg-card p-4 ring-1 ring-foreground/8">
@@ -154,10 +163,11 @@ export default function KanjiDetailPage({
             href={`/kanji/ch/${chapter.id}/quiz`}
             className="inline-flex h-11 items-center rounded-2xl bg-secondary px-4 text-sm font-medium"
           >
-            အခန်း quiz
+            実戦問題
           </Link>
         ) : null}
       </div>
+      <SourceCredits compact />
     </div>
   )
 }

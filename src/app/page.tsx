@@ -30,10 +30,10 @@ const MODULES = [
   },
   {
     href: "/kanji",
-    title: "漢字 · Kanji Master",
-    my: "အခန်းလိုက် ခန်ဂျိ၊ စုတ်ချက်၊ 熟語",
+    title: "漢字 · 総まとめ N2",
+    my: "၈ပတ် × ၇ရက် · စုတ်ချက်၊ 熟語၊ 実戦問題",
     icon: SpellCheck2,
-    detail: "N2 ၃၆၇ လုံး · quiz + 星問題",
+    detail: "N2 ၃၆၇ လုံး · Ask Publishing ပုံစံ",
   },
   {
     href: "/grammar",

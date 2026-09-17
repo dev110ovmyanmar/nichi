@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useRef, useState } from "react"
+import { SourceCite } from "@/components/jlpt/source-credits"
 
 function kanjiVgUrl(character: string) {
   const code = character.codePointAt(0)?.toString(16).padStart(5, "0")
@@ -64,7 +65,10 @@ export function KanjiStroke({ character }: { character: string }) {
         <p className="mb-2 text-xs font-medium text-muted-foreground">
           {error
             ? "Stroke SVG မရပါ။ အောက်တွင် ကိုယ်တိုင် ရေးလေ့ကျင့်ပါ။"
-            : "KanjiVG မှ စုတ်ချက် အစီအစဉ် · ညာဘက်တွင် ရေးကြည့်ပါ"}
+            : "စုတ်ချက် အစီအစဉ် · ညာဘက်တွင် ရေးကြည့်ပါ"}
+        </p>
+        <p className="mb-2">
+          <SourceCite id="kanjivg" />
         </p>
         <canvas
           ref={canvasRef}
