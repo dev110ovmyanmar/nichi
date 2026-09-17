@@ -136,7 +136,7 @@ export function StudyApp() {
   return (
     <div className="min-h-svh bg-background">
       <AppHeader streak={streak} onOpenSettings={() => setSettingsOpen(true)} />
-      <main className="mx-auto flex w-full max-w-6xl flex-col gap-4 px-4 pt-4 pb-28 sm:gap-6 sm:px-6 sm:pt-8 lg:pb-8">
+      <main className="mx-auto flex w-full max-w-6xl flex-col gap-4 px-4 pt-4 pb-28 sm:gap-6 sm:px-6 sm:pt-8">
         <section className="flex flex-col gap-1 sm:gap-2">
           <p className="text-[11px] font-medium tracking-[0.16em] text-muted-foreground uppercase">
             Keep showing up

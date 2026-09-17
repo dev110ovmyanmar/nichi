@@ -2,7 +2,6 @@
 
 import { useMemo, useState } from "react"
 import { createPortal } from "react-dom"
-import { Check, RotateCcw } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useHydrated } from "@/hooks/use-hydrated"
 import {
@@ -106,7 +105,7 @@ export function StudyForm({ editing, onSubmit, onCancelEdit }: StudyFormProps) {
           ...emptyDraft(),
           subject: knownSubjects.has(subject) ? subject : "Grammar",
         })
-        setCustomSubject(knownSubjects.has(subject) ? "" : "")
+        setCustomSubject("")
       }
       setError(null)
       return
@@ -147,7 +146,8 @@ export function StudyForm({ editing, onSubmit, onCancelEdit }: StudyFormProps) {
         ...emptyDraft(),
         subject: knownSubjects.has(subject) ? subject : "Grammar",
       })
-      setCustomSubject(knownSubjects.has(subject) ? "" : "")
+      setCustomSubject("")
+      setShowCustomTime(false)
     }
     setError(null)
   }
@@ -157,36 +157,67 @@ export function StudyForm({ editing, onSubmit, onCancelEdit }: StudyFormProps) {
     saveDraft()
   }
 
-  const presetButtons = (
-    <div className="grid grid-cols-3 gap-2">
-      {DURATION_PRESETS.map((minutes) => (
-        <Button
-          key={minutes}
-          type="button"
-          className="h-12 rounded-2xl text-base font-semibold lg:h-11 lg:rounded-xl lg:text-sm"
-          variant="secondary"
-          onClick={() => applyPreset(minutes, !editing)}
-        >
-          {minutes === 60 ? "+1h" : `+${minutes}m`}
-        </Button>
-      ))}
+  const dock = (
+    <div
+      className="study-dock border-t border-border/70 bg-background/90 px-4 pt-3 shadow-[0_-12px_32px_oklch(0.28_0.035_250/0.12)] backdrop-blur-xl"
+      style={{
+        position: "fixed",
+        left: 0,
+        right: 0,
+        bottom: 0,
+        zIndex: 50,
+        paddingBottom: "max(0.85rem, env(safe-area-inset-bottom))",
+      }}
+    >
+      {editing ? (
+        <div className="mx-auto flex max-w-6xl gap-2">
+          <Button
+            type="button"
+            className="h-12 flex-1 rounded-2xl"
+            onClick={saveDraft}
+          >
+            Save
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            className="h-12 rounded-2xl"
+            onClick={onCancelEdit}
+          >
+            Cancel
+          </Button>
+        </div>
+      ) : (
+        <div className="mx-auto grid max-w-6xl grid-cols-3 gap-2">
+          {DURATION_PRESETS.map((minutes) => (
+            <Button
+              key={minutes}
+              type="button"
+              className="h-12 rounded-2xl text-base font-semibold"
+              variant="secondary"
+              onClick={() => applyPreset(minutes, true)}
+            >
+              {minutes === 60 ? "+1h" : `+${minutes}m`}
+            </Button>
+          ))}
+        </div>
+      )}
     </div>
   )
 
   return (
     <>
       <Card id="logger" className="scroll-mt-20">
-      <CardHeader className="border-b">
-        <CardTitle className="text-lg sm:text-base">
-          {editing ? "Edit session" : "Log study"}
-        </CardTitle>
-        <CardDescription>
-          Pick a subject, then tap a time. On a phone the chips stay at the bottom.
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <form className="grid gap-4" onSubmit={handleSubmit} noValidate>
-          <div className="grid gap-3 sm:grid-cols-2">
+        <CardHeader className="border-b">
+          <CardTitle className="text-lg sm:text-base">
+            {editing ? "Edit session" : "Log study"}
+          </CardTitle>
+          <CardDescription>
+            Pick a subject, then tap +15m, +30m, or +1h on the bar at the bottom.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form className="grid gap-4" onSubmit={handleSubmit} noValidate>
             <div className="grid gap-1.5">
               <Label htmlFor="study-date">Date</Label>
               <Input
@@ -198,190 +229,128 @@ export function StudyForm({ editing, onSubmit, onCancelEdit }: StudyFormProps) {
                 required
               />
             </div>
-            <div className="hidden items-end sm:flex">
-              <p className="pb-2 text-xs text-muted-foreground tabular-nums">
-                {formatDuration(selectedMinutes)} selected
-              </p>
-            </div>
-          </div>
 
-          <div className="grid gap-2">
-            <Label>Subject</Label>
-            <div className="flex gap-2 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] sm:flex-wrap sm:overflow-visible [&::-webkit-scrollbar]:hidden">
-              {SUBJECTS.map((subject) => {
-                const active = draft.subject === subject
-                return (
-                  <Button
-                    key={subject}
-                    type="button"
-                    className="h-10 min-h-10 shrink-0 rounded-full px-3.5"
-                    variant={active ? "default" : "outline"}
-                    onClick={() => setSubject(subject)}
-                  >
-                    {subject}
-                  </Button>
-                )
-              })}
-            </div>
-            {usingCustom ? (
-              <Input
-                placeholder="Custom topic"
-                value={customSubject}
-                onChange={(event) => {
-                  setCustomSubject(event.target.value)
-                  update("subject", event.target.value)
-                }}
-              />
-            ) : null}
-          </div>
-
-          <div className="grid gap-2">
-            <div className="flex items-center justify-between">
-              <Label>Quick log</Label>
-              <span className="text-xs text-muted-foreground tabular-nums sm:hidden">
-                {formatDuration(selectedMinutes)}
-              </span>
-            </div>
-            <div className="hidden lg:block">{presetButtons}</div>
-            <button
-              type="button"
-              onClick={() => setShowCustomTime((open) => !open)}
-              className="min-h-11 appearance-none bg-transparent p-0 text-left text-sm font-medium text-muted-foreground lg:hidden"
-            >
-              {showCustomTime ? "Hide custom time" : "Need a custom time?"}
-            </button>
-            <div
-              className={cn(
-                "grid-cols-2 gap-3 lg:grid",
-                showCustomTime ? "grid" : "hidden"
-              )}
-            >
-              <div className="grid gap-1.5">
-                <Label htmlFor="study-hours">Hours</Label>
-                <Input
-                  id="study-hours"
-                  inputMode="numeric"
-                  type="number"
-                  min={0}
-                  max={12}
-                  value={draft.hours}
-                  onChange={(event) =>
-                    update("hours", Number(event.target.value))
-                  }
-                />
+            <div className="grid gap-2">
+              <Label>Subject</Label>
+              <div className="flex gap-2 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] sm:flex-wrap sm:overflow-visible [&::-webkit-scrollbar]:hidden">
+                {SUBJECTS.map((subject) => {
+                  const active = draft.subject === subject
+                  return (
+                    <Button
+                      key={subject}
+                      type="button"
+                      className="h-10 min-h-10 shrink-0 rounded-full px-3.5"
+                      variant={active ? "default" : "outline"}
+                      onClick={() => setSubject(subject)}
+                    >
+                      {subject}
+                    </Button>
+                  )
+                })}
               </div>
-              <div className="grid gap-1.5">
-                <Label htmlFor="study-minutes">Minutes</Label>
+              {usingCustom ? (
                 <Input
-                  id="study-minutes"
-                  inputMode="numeric"
-                  type="number"
-                  min={0}
-                  max={59}
-                  value={draft.minutes}
-                  onChange={(event) =>
-                    update("minutes", Number(event.target.value))
-                  }
+                  placeholder="Custom topic"
+                  value={customSubject}
+                  onChange={(event) => {
+                    setCustomSubject(event.target.value)
+                    update("subject", event.target.value)
+                  }}
                 />
-              </div>
+              ) : null}
             </div>
-            <button
-              type="button"
-              onClick={saveDraft}
-              className={cn(
-                "min-h-11 appearance-none bg-transparent p-0 text-left text-sm font-medium text-primary underline-offset-4 hover:underline",
-                showCustomTime || editing ? "inline" : "hidden lg:inline"
-              )}
-            >
-              Save {formatDuration(selectedMinutes)}
-            </button>
-          </div>
 
-          <div className="grid gap-1.5">
-            <Label htmlFor="study-notes">Notes</Label>
-            <Textarea
-              id="study-notes"
-              placeholder="What clicked today?"
-              className="min-h-20"
-              value={draft.notes}
-              onChange={(event) => update("notes", event.target.value)}
-            />
-          </div>
-
-          <div className="grid gap-2">
-            <Label>Status</Label>
-            <div className="grid grid-cols-3 gap-2">
-              {STATUS_OPTIONS.map((option) => {
-                const active = draft.status === option.value
-                return (
-                  <button
-                    key={option.value}
-                    type="button"
-                    onClick={() => update("status", option.value)}
-                    className={cn(
-                      "h-10 rounded-full border text-sm font-medium transition-colors",
-                      active
-                        ? "border-primary bg-primary text-primary-foreground"
-                        : "border-border bg-background text-muted-foreground"
-                    )}
-                  >
-                    {option.label}
-                  </button>
-                )
-              })}
-            </div>
-          </div>
-
-          {error ? <p className="text-sm text-destructive">{error}</p> : null}
-
-          {editing ? (
-            <div className="hidden gap-2 lg:flex">
-              <Button type="button" className="h-11 flex-1" onClick={saveDraft}>
-                <Check data-icon="inline-start" />
-                Save
-              </Button>
-              <Button
+            <div className="grid gap-2">
+              <button
                 type="button"
-                variant="outline"
-                className="h-11"
-                onClick={onCancelEdit}
+                onClick={() => setShowCustomTime((open) => !open)}
+                className="min-h-11 appearance-none bg-transparent p-0 text-left text-sm font-medium text-muted-foreground"
               >
-                <RotateCcw data-icon="inline-start" />
-                Cancel
-              </Button>
-            </div>
-          ) : null}
-        </form>
-      </CardContent>
-      </Card>
-      {hydrated
-        ? createPortal(
-            <div className="fixed inset-x-0 bottom-0 z-50 border-t border-border/70 bg-background/90 px-4 pt-3 shadow-[0_-12px_32px_oklch(0.28_0.035_250/0.12)] backdrop-blur-xl pb-[max(0.85rem,env(safe-area-inset-bottom))] lg:hidden">
-              {editing ? (
-                <div className="mx-auto flex max-w-6xl gap-2">
-                  <Button
+                {showCustomTime ? "Hide custom time" : "Need a custom time?"}
+              </button>
+              {showCustomTime ? (
+                <>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="grid gap-1.5">
+                      <Label htmlFor="study-hours">Hours</Label>
+                      <Input
+                        id="study-hours"
+                        inputMode="numeric"
+                        type="number"
+                        min={0}
+                        max={12}
+                        value={draft.hours}
+                        onChange={(event) =>
+                          update("hours", Number(event.target.value))
+                        }
+                      />
+                    </div>
+                    <div className="grid gap-1.5">
+                      <Label htmlFor="study-minutes">Minutes</Label>
+                      <Input
+                        id="study-minutes"
+                        inputMode="numeric"
+                        type="number"
+                        min={0}
+                        max={59}
+                        value={draft.minutes}
+                        onChange={(event) =>
+                          update("minutes", Number(event.target.value))
+                        }
+                      />
+                    </div>
+                  </div>
+                  <button
                     type="button"
-                    className="h-12 flex-1 rounded-2xl"
                     onClick={saveDraft}
+                    className="min-h-11 appearance-none bg-transparent p-0 text-left text-sm font-medium text-primary underline-offset-4 hover:underline"
                   >
-                    Save
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    className="h-12 rounded-2xl"
-                    onClick={onCancelEdit}
-                  >
-                    Cancel
-                  </Button>
-                </div>
-              ) : (
-                <div className="mx-auto max-w-6xl">{presetButtons}</div>
-              )}
-            </div>,
-            document.body
-          )
-        : null}
+                    Save {formatDuration(selectedMinutes)}
+                  </button>
+                </>
+              ) : null}
+            </div>
+
+            <div className="grid gap-1.5">
+              <Label htmlFor="study-notes">Notes</Label>
+              <Textarea
+                id="study-notes"
+                placeholder="What clicked today?"
+                className="min-h-20"
+                value={draft.notes}
+                onChange={(event) => update("notes", event.target.value)}
+              />
+            </div>
+
+            <div className="grid gap-2">
+              <Label>Status</Label>
+              <div className="grid grid-cols-3 gap-2">
+                {STATUS_OPTIONS.map((option) => {
+                  const active = draft.status === option.value
+                  return (
+                    <button
+                      key={option.value}
+                      type="button"
+                      onClick={() => update("status", option.value)}
+                      className={cn(
+                        "h-10 rounded-full border text-sm font-medium transition-colors",
+                        active
+                          ? "border-primary bg-primary text-primary-foreground"
+                          : "border-border bg-background text-muted-foreground"
+                      )}
+                    >
+                      {option.label}
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+
+            {error ? <p className="text-sm text-destructive">{error}</p> : null}
+          </form>
+        </CardContent>
+      </Card>
+      {hydrated ? createPortal(dock, document.body) : null}
     </>
   )
 }
