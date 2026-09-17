@@ -42,13 +42,8 @@ function subscribe(listener: () => void) {
   }
 }
 
-function subscribeNever() {
-  return () => {}
-}
-
 export function useStudyStore() {
   const store = useSyncExternalStore(subscribe, read, () => emptyStore)
-  const ready = useSyncExternalStore(subscribeNever, () => true, () => false)
 
   const addLog = useCallback((draft: LogDraft) => {
     const current = read()
@@ -113,7 +108,6 @@ export function useStudyStore() {
   return {
     logs: sortedLogs,
     settings: store.settings,
-    ready,
     addLog,
     updateLog,
     deleteLog,

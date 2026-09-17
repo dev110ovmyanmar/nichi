@@ -30,7 +30,6 @@ export function StudyApp() {
   const {
     logs,
     settings,
-    ready,
     addLog,
     updateLog,
     deleteLog,
@@ -59,7 +58,6 @@ export function StudyApp() {
   )
 
   useReminder({
-    ready,
     settings,
     studiedToday: todayMinutes > 0,
     onNotified: handleNotified,
@@ -83,14 +81,6 @@ export function StudyApp() {
   function handleEdit(log: StudyLog) {
     setEditing(log)
     document.getElementById("logger")?.scrollIntoView({ behavior: "smooth" })
-  }
-
-  if (!ready) {
-    return (
-      <div className="flex min-h-svh items-center justify-center text-sm text-muted-foreground">
-        Loading your journal…
-      </div>
-    )
   }
 
   return (

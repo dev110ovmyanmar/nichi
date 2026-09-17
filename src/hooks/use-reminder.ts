@@ -6,14 +6,12 @@ import { currentTimeHHMM, todayISO } from "@/lib/dates"
 import type { AppSettings } from "@/lib/types"
 
 type Options = {
-  ready: boolean
   settings: AppSettings
   studiedToday: boolean
   onNotified: (date: string) => void
 }
 
 export function useReminder({
-  ready,
   settings,
   studiedToday,
   onNotified,
@@ -24,7 +22,7 @@ export function useReminder({
   const lastNotifiedDate = settings.lastNotifiedDate
 
   useEffect(() => {
-    if (!ready || !enabled) return
+    if (!enabled) return
 
     const fire = () => {
       const today = todayISO()
@@ -59,7 +57,6 @@ export function useReminder({
     const id = window.setInterval(fire, 15_000)
     return () => window.clearInterval(id)
   }, [
-    ready,
     enabled,
     reminderTime,
     reminderMessage,
