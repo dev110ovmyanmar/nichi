@@ -1,7 +1,8 @@
 import type { Metadata, Viewport } from "next"
-import { Geist, Geist_Mono } from "next/font/google"
+import { Geist, Geist_Mono, Noto_Sans_JP, Noto_Sans_Myanmar } from "next/font/google"
 import { Toaster } from "@/components/ui/sonner"
 import { ThemeProvider } from "@/components/theme-provider"
+import { NichiFrame } from "@/components/shell/nichi-frame"
 import "./globals.css"
 
 const geistSans = Geist({
@@ -12,6 +13,18 @@ const geistSans = Geist({
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
+})
+
+const notoJp = Noto_Sans_JP({
+  variable: "--font-jp",
+  subsets: ["latin"],
+  weight: ["400", "500", "700"],
+})
+
+const notoMy = Noto_Sans_Myanmar({
+  variable: "--font-myanmar",
+  subsets: ["myanmar"],
+  weight: ["400", "500", "700"],
 })
 
 export const viewport: Viewport = {
@@ -25,21 +38,21 @@ export const viewport: Viewport = {
 }
 
 export const metadata: Metadata = {
-  title: "Nichi — Study tracker",
+  title: "Nichi N2 — JLPT N2 for Burmese speakers",
   description:
-    "Log study sessions, run Pomodoros, keep a streak, and watch weekly progress until exam day.",
+    "JLPT N2 vocabulary, kanji, grammar, reading, listening, and mock exams with Burmese explanations, plus a daily study journal.",
 }
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
-      lang="en"
+      lang="my"
       suppressHydrationWarning
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${geistSans.variable} ${geistMono.variable} ${notoJp.variable} ${notoMy.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col font-sans">
         <ThemeProvider>
-          {children}
+          <NichiFrame>{children}</NichiFrame>
           <Toaster position="top-center" offset={{ top: 72 }} mobileOffset={{ top: 64 }} />
         </ThemeProvider>
       </body>

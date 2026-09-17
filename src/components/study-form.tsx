@@ -166,7 +166,7 @@ export function StudyForm({ editing, onSubmit, onCancelEdit }: StudyFormProps) {
         right: 0,
         bottom: 0,
         zIndex: 50,
-        paddingBottom: "max(0.85rem, env(safe-area-inset-bottom))",
+        paddingBottom: "0.75rem",
       }}
     >
       {editing ? (

@@ -1,45 +1,36 @@
-# Nichi — Study tracker
+# Nichi N2 — JLPT N2 for Burmese speakers
 
-Nichi is a local-first study journal: log sessions, run Pomodoros, protect a streak, and see progress toward an exam date. Built for language exams (JLPT and similar) but it works for any tagged subject.
+Local-first JLPT N2 prep: vocabulary, kanji, grammar, reading, listening, a timed mock exam, and the original daily study journal. Explanations are in **မြန်မာ** and Japanese. Nothing is uploaded.
 
-All data stays in the browser via `localStorage`. There is no account and no server.
+## Modules
 
-## Features
+- **語彙** — 3,500+ N2+N3 words (OpenJLPT), furigana, 自動詞/他動詞 tags when inferred, bookmarks, TTS.
+- **漢字** — 367 N2 kanji, on/kun, stroke count, KanjiVG stroke order + writing pad, compound links.
+- **文法** — 60+ N2 patterns with 接続, Burmese notes, nuance compare, 星問題 sorting.
+- **複合動詞・慣用句** — compound verbs and idioms with Burmese glosses.
+- **読解** — short / medium / long / 情報検索 passages with click-to-translate and Burmese answer notes.
+- **聴解** — five exam sections, 0.8x–1.2x Japanese speech, JP/MY script toggle.
+- **模擬試験** — scaled Language / Reading / Listening scores, pass at 90/180 with 19-point sectional cut-offs.
+- **Journal** — daily logger, streak, heatmap, Pomodoro, exam countdown (bell settings).
 
-- **Daily logger** — date (defaults to today), subject tags (Kanji, Grammar, Reading, Listening, Vocabulary, Past Papers), hours/minutes, notes, and mastery.
-- **Quick-add presets** — `+15m`, `+30m`, `+1h` instantly log the selected tag.
-- **Daily target** — progress bar toward a 2-hour default goal (editable).
-- **Exam countdown** — customizable exam name and date.
-- **Streaks** — consecutive days with at least one session.
-- **Weekly analytics** — bar chart of hours per day and a donut of subject mix.
-- **Activity heatmap** — GitHub-style last 17 weeks.
-- **Pomodoro** — 25/5 timer that auto-logs a 25-minute session when a focus block finishes.
-- **Reminders** — daily time and message, in-app toast, optional browser notifications.
-- **Backup** — export and import JSON from settings.
-- **Theme** — cream paper light mode, navy-teal dark mode, and a mobile-first layout with sticky quick-add chips.
-
-## Run locally
+## Run
 
 ```bash
 npm install
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000). The first visit seeds sample history so charts and the heatmap are not empty. Restore, clear, or import JSON from **Targets & reminders** (bell icon).
+Production:
 
 ```bash
 npm run build
 npm start
 ```
 
-## Stack
+## Data & licenses
 
-- Next.js (App Router) + React + TypeScript
-- Tailwind CSS + shadcn/ui
-- Lucide icons
-- Recharts
-- `localStorage` persistence
+- Vocab/kanji JSON in `public/data/` is derived from [OpenJLPT](https://github.com/evanclan/OpenJLPT) (CC BY-SA 4.0), which uses JMdict/KANJIDIC2 (EDRDG), tanos.co.uk level tags (CC BY), and Tatoeba examples (CC BY 2.0 FR). See `public/data/ATTRIBUTION.md`.
+- Burmese grammar notes, reading passages, listening scripts, and mock-exam copy are original.
+- Progress: `localStorage` keys `nichi.jlpt-progress.v1` and `nichi.study-store.v2`.
 
-## Data
-
-Sessions and settings are stored under `nichi.study-store.v2`. Export JSON from settings if you want a portable backup. Clearing site data in the browser removes them.
+Listening uses the browser `speechSynthesis` Japanese voice when available (no bundled audio files).

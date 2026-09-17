@@ -140,6 +140,21 @@
 .study-dock {
   position: fixed;
   inset-inline: 0;
-  bottom: 0;
+  bottom: calc(3.6rem + env(safe-area-inset-bottom));
   z-index: 50;
+}
+
+@media (min-width: 1024px) {
+  .study-dock {
+    bottom: 0;
+  }
+}
+
+.ruby-jp ruby rt {
+  font-family: var(--font-sans);
+}
+
+.my-script {
+  font-family: var(--font-myanmar), var(--font-sans), sans-serif;
+  line-height: 1.7;
 }

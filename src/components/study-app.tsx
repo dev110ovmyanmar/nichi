@@ -1,6 +1,7 @@
 "use client"
 
 import { useCallback, useMemo, useState } from "react"
+import { Bell } from "lucide-react"
 import { toast } from "sonner"
 import { ActivityHeatmap } from "@/components/activity-heatmap"
 import { AppHeader } from "@/components/app-header"
@@ -12,6 +13,7 @@ import { StatsOverview } from "@/components/stats-overview"
 import { StudyForm } from "@/components/study-form"
 import { SubjectBreakdown } from "@/components/subject-breakdown"
 import { WeeklyChart } from "@/components/weekly-chart"
+import { Button } from "@/components/ui/button"
 import { useReminder } from "@/hooks/use-reminder"
 import { useStudyStore, type LogDraft } from "@/hooks/use-study-store"
 import { lastNDates, todayISO } from "@/lib/dates"
@@ -33,7 +35,7 @@ import {
 import { DEFAULT_SETTINGS } from "@/lib/constants"
 import type { StudyLog } from "@/lib/types"
 
-export function StudyApp() {
+export function StudyApp({ embedded = false }: { embedded?: boolean }) {
   const {
     logs,
     settings,
@@ -134,17 +136,38 @@ export function StudyApp() {
   }
 
   return (
-    <div className="min-h-svh bg-background">
-      <AppHeader streak={streak} onOpenSettings={() => setSettingsOpen(true)} />
-      <main className="mx-auto flex w-full max-w-6xl flex-col gap-4 px-4 pt-4 pb-28 sm:gap-6 sm:px-6 sm:pt-8">
-        <section className="flex flex-col gap-1 sm:gap-2">
-          <p className="text-[11px] font-medium tracking-[0.16em] text-muted-foreground uppercase">
-            Keep showing up
-          </p>
-          <h1 className="font-heading max-w-xl text-[1.65rem] leading-tight font-semibold tracking-tight sm:text-4xl">
-            Log today. Protect the streak.
-          </h1>
-        </section>
+    <div className={embedded ? "flex flex-col gap-4" : "min-h-svh bg-background"}>
+      {embedded ? (
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <p className="text-[11px] font-medium tracking-[0.16em] text-muted-foreground uppercase">
+              မှတ်တမ်း
+            </p>
+            <h1 className="font-heading text-[1.65rem] leading-tight font-semibold tracking-tight">
+              နေ့စဉ် study log
+            </h1>
+          </div>
+          <Button
+            type="button"
+            variant="outline"
+            size="icon"
+            className="size-10"
+            aria-label="Reminder settings"
+            onClick={() => setSettingsOpen(true)}
+          >
+            <Bell />
+          </Button>
+        </div>
+      ) : (
+        <AppHeader streak={streak} onOpenSettings={() => setSettingsOpen(true)} />
+      )}
+      <main
+        className={
+          embedded
+            ? "flex flex-col gap-4"
+            : "mx-auto flex w-full max-w-6xl flex-col gap-4 px-4 pt-4 pb-28 sm:gap-6 sm:px-6 sm:pt-8"
+        }
+      >
 
         <ReminderBanner
           visible={todayMinutes === 0}
