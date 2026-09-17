@@ -2,6 +2,12 @@ export type JlptLevel = "N2" | "N3"
 
 export type Transitivity = "vi" | "vt" | "both"
 
+export type ExampleSentence = {
+  ja: string
+  en: string
+  my?: string
+}
+
 export type VocabEntry = {
   id: string
   word: string
@@ -11,7 +17,10 @@ export type VocabEntry = {
   level: JlptLevel
   pos: string
   transitivity: Transitivity | null
-  examples: Array<{ ja: string; en: string; my?: string }>
+  examples: ExampleSentence[]
+  chapterId: string
+  sectionId: string
+  order: number
 }
 
 export type KanjiEntry = {
@@ -26,6 +35,32 @@ export type KanjiEntry = {
   freq: number | null
   level: "N2"
   compounds?: string[]
+  chapterId: string
+  sectionId: string
+  order: number
+  radical: string
+  radicalMy: string
+  examples: ExampleSentence[]
+}
+
+export type CurriculumSection = {
+  id: string
+  number: number
+  titleJa: string
+  titleMy: string
+  keywords: string[]
+}
+
+export type CurriculumChapter = {
+  id: string
+  book: "tango" | "kanji-master"
+  number: number
+  titleJa: string
+  titleMy: string
+  summaryMy: string
+  radical?: string
+  radicalMy?: string
+  sections: CurriculumSection[]
 }
 
 export type GrammarEntry = {
@@ -114,4 +149,23 @@ export type ListeningItem = {
 
 export type ExamSectionId = "language" | "reading" | "listening"
 
-export type QuizKind = "vocab" | "kanji" | "grammar" | "sort" | "reading" | "listening" | "exam"
+export type QuizKind =
+  | "vocab"
+  | "kanji"
+  | "grammar"
+  | "sort"
+  | "reading"
+  | "listening"
+  | "exam"
+  | "star"
+
+export type QuizQuestion = {
+  id: string
+  kind: "choice" | "star"
+  promptJa: string
+  promptMy: string
+  promptReading?: string
+  choices: string[]
+  answerIndex: number
+  explainMy: string
+}

@@ -41,7 +41,7 @@ export function ListeningCard({
           <Pause data-icon="inline-start" />
           停止
         </Button>
-        {[0.8, 1, 1.2].map((value) => (
+        {[0.8, 0.9, 1, 1.1, 1.2].map((value) => (
           <button
             key={value}
             type="button"

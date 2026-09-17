@@ -1,5 +1,6 @@
 import Link from "next/link"
 import { GRAMMAR } from "@/data/grammar"
+import { GrammarBrowser } from "@/components/jlpt/grammar-browser"
 import { ModuleHero } from "@/components/jlpt/module-hero"
 
 export default function GrammarPage() {
@@ -8,7 +9,7 @@ export default function GrammarPage() {
       <ModuleHero
         kicker="文法"
         title="N2 သဒ္ဒါ"
-        description="接続 စည်းကမ်း၊ မြန်မာ ရှင်းချက်၊ ဥပမာ၊ နီးစပ်ပုံစံ နှိုင်းယှဉ်၊ 星問題 စီခြင်း။"
+        description={`${GRAMMAR.length} ပုံစံ · 接続 စည်းကမ်း၊ မြန်မာ ရှင်းချက်၊ ဥပမာ၊ နီးစပ်ပုံစံ နှိုင်းယှဉ်၊ 星問題 စီခြင်း။`}
       />
       <div className="mb-4 grid grid-cols-2 gap-2">
         <Link
@@ -24,19 +25,7 @@ export default function GrammarPage() {
           星問題 並べ替え
         </Link>
       </div>
-      <div className="grid gap-2 sm:grid-cols-2">
-        {GRAMMAR.map((item) => (
-          <Link
-            key={item.id}
-            href={`/grammar/${item.id}`}
-            className="rounded-3xl bg-card p-4 ring-1 ring-foreground/8"
-          >
-            <p className="font-heading text-lg font-semibold">{item.pattern}</p>
-            <p className="my-script mt-1 text-sm text-muted-foreground">{item.meaningMy}</p>
-            <p className="mt-2 text-[11px] text-muted-foreground">{item.connection}</p>
-          </Link>
-        ))}
-      </div>
+      <GrammarBrowser />
     </div>
   )
 }

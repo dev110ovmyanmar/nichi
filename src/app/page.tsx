@@ -8,6 +8,7 @@ import {
   Languages,
   NotebookPen,
   PenLine,
+  SpellCheck2,
 } from "lucide-react"
 import { ExamCountdown } from "@/components/exam-countdown"
 import { GRAMMAR } from "@/data/grammar"
@@ -22,10 +23,17 @@ import { formatDuration } from "@/lib/stats"
 const MODULES = [
   {
     href: "/vocab",
-    title: "語彙・漢字",
-    my: "ဝေါဟာရနှင့် ခန်ဂျိ",
+    title: "語彙 · Tango 2500",
+    my: "အခန်း/အပိုင်း ဝေါဟာရ ကတ်များ",
     icon: Languages,
-    detail: "N2+N3 ၃,၅၀၀+ · 漢字 ၃၆၇",
+    detail: "N2 ၁,၇၉၃ + N3 ပြန်လည်သုံးသပ်",
+  },
+  {
+    href: "/kanji",
+    title: "漢字 · Kanji Master",
+    my: "အခန်းလိုက် ခန်ဂျိ၊ စုတ်ချက်၊ 熟語",
+    icon: SpellCheck2,
+    detail: "N2 ၃၆၇ လုံး · quiz + 星問題",
   },
   {
     href: "/grammar",

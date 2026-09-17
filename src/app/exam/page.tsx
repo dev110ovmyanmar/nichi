@@ -8,7 +8,7 @@ export default function ExamPage() {
       <ModuleHero
         kicker="模擬試験"
         title="N2 အစမ်းစာမေးပွဲ"
-        description="ဘာသာစကား+ဖတ်ရှု နှင့် နားထောင်။ ရမှတ်ကို ၁၈၀ သို့ စကေးချပြီး ကဏ္ဍဖြတ်မှတ် ၁၉၊ စု ၉၀ နှင့် တိုင်းသည်။"
+        description="ဘာသာစကား+ဖတ်ရှု ၁၀၅ မိနစ်၊ နားထောင် ၅၀ မိနစ်။ ရမှတ်ကို ၁၈၀ သို့ စကေးချပြီး ကဏ္ဍဖြတ်မှတ် ၁၉၊ စု ၉၀ နှင့် တိုင်းသည်။"
       />
       <div className="flex flex-wrap gap-2 text-sm">
         <Link href="/listening" className="rounded-full bg-muted px-3 py-2">

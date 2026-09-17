@@ -1,4 +1,5 @@
 import type { QuizKind } from "@/lib/jlpt/types"
+import { idbSet } from "@/lib/jlpt/idb"
 
 const KEY = "nichi.jlpt-progress.v1"
 
@@ -11,6 +12,10 @@ export type JlptProgress = {
   }
   knownVocab: string[]
   knownKanji: string[]
+  completedChapters: {
+    tango: string[]
+    kanji: string[]
+  }
   lastVocabId: string | null
   lastGrammarId: string | null
   lastReadingId: string | null
@@ -20,6 +25,7 @@ export type JlptProgress = {
     score: number
     total: number
     at: string
+    chapterId?: string
   }>
 }
 
@@ -27,6 +33,7 @@ const empty: JlptProgress = {
   bookmarks: { vocab: [], kanji: [], grammar: [], compounds: [] },
   knownVocab: [],
   knownKanji: [],
+  completedChapters: { tango: [], kanji: [] },
   lastVocabId: null,
   lastGrammarId: null,
   lastReadingId: null,
@@ -44,6 +51,7 @@ function read(): JlptProgress {
       memory = {
         ...empty,
         bookmarks: { vocab: [], kanji: [], grammar: [], compounds: [] },
+        completedChapters: { tango: [], kanji: [] },
       }
       return memory
     }
@@ -52,6 +60,10 @@ function read(): JlptProgress {
       ...empty,
       ...parsed,
       bookmarks: { ...empty.bookmarks, ...parsed.bookmarks },
+      completedChapters: {
+        ...empty.completedChapters,
+        ...parsed.completedChapters,
+      },
     }
     return memory
   } catch {
@@ -63,6 +75,7 @@ function read(): JlptProgress {
 function write(next: JlptProgress) {
   memory = next
   localStorage.setItem(KEY, JSON.stringify(next))
+  void idbSet(KEY, next)
 }
 
 export function loadProgress() {

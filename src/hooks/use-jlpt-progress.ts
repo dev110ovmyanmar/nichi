@@ -55,8 +55,23 @@ export function useJlptProgress() {
     }
   }, [update])
 
+  const completeChapter = useCallback(
+    (book: "tango" | "kanji", chapterId: string) => {
+      const current = loadProgress()
+      const list = current.completedChapters[book]
+      if (list.includes(chapterId)) return
+      update({
+        completedChapters: {
+          ...current.completedChapters,
+          [book]: [...list, chapterId],
+        },
+      })
+    },
+    [update]
+  )
+
   const recordQuiz = useCallback(
-    (kind: QuizKind, score: number, total: number) => {
+    (kind: QuizKind, score: number, total: number, chapterId?: string) => {
       const current = loadProgress()
       update({
         quizHistory: [
@@ -66,6 +81,7 @@ export function useJlptProgress() {
             score,
             total,
             at: new Date().toISOString(),
+            chapterId,
           },
           ...current.quizHistory,
         ].slice(0, 40),
@@ -74,5 +90,12 @@ export function useJlptProgress() {
     [update]
   )
 
-  return { progress, update, toggleBookmark, markKnown, recordQuiz }
+  return {
+    progress,
+    update,
+    toggleBookmark,
+    markKnown,
+    completeChapter,
+    recordQuiz,
+  }
 }

@@ -1,13 +1,15 @@
 import type { KanjiEntry, VocabEntry } from "@/lib/jlpt/types"
+import { assignKanji, assignVocab } from "@/lib/jlpt/curriculum"
 
 let vocabPromise: Promise<VocabEntry[]> | null = null
 let kanjiPromise: Promise<KanjiEntry[]> | null = null
 
 export function loadVocab(): Promise<VocabEntry[]> {
   if (!vocabPromise) {
-    vocabPromise = fetch("/data/vocab.json").then((res) => {
+    vocabPromise = fetch("/data/vocab.json").then(async (res) => {
       if (!res.ok) throw new Error("Could not load vocabulary")
-      return res.json()
+      const raw = (await res.json()) as VocabEntry[]
+      return assignVocab(raw)
     })
   }
   return vocabPromise
@@ -15,10 +17,13 @@ export function loadVocab(): Promise<VocabEntry[]> {
 
 export function loadKanji(): Promise<KanjiEntry[]> {
   if (!kanjiPromise) {
-    kanjiPromise = fetch("/data/kanji.json").then((res) => {
-      if (!res.ok) throw new Error("Could not load kanji")
-      return res.json()
-    })
+    kanjiPromise = Promise.all([
+      fetch("/data/kanji.json").then((res) => {
+        if (!res.ok) throw new Error("Could not load kanji")
+        return res.json() as Promise<KanjiEntry[]>
+      }),
+      loadVocab(),
+    ]).then(([raw, vocab]) => assignKanji(raw, vocab))
   }
   return kanjiPromise
 }

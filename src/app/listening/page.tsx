@@ -16,7 +16,7 @@ export default function ListeningIndexPage() {
       <ModuleHero
         kicker="聴解"
         title="N2 နားထောင်"
-        description="၅ ပိုင်း။ HTML5 မဟုတ် — ja-JP စကားပြောအင်ဂျင်ဖြင့် 0.8x–1.2x၊ ဂျပန်/မြန်မာ စာသား ပြောင်းနိုင်သည်။"
+        description="၅ ပိုင်း (課題理解၊ ポイント理解၊ 概要理解၊ 即時応答၊ 統合理解)။ အသံဖွင့်စက် 0.8x–1.2x နှင့် ဂျပန်/မြန်မာ စာသား ပြောင်းနိုင်သည်။"
       />
       <div className="grid gap-2">
         {LISTENING.map((item) => (

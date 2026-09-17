@@ -1,11 +1,12 @@
 "use client"
 
-import { useMemo, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import { GRAMMAR } from "@/data/grammar"
 import { LISTENING } from "@/data/listening"
 import { READINGS } from "@/data/reading"
 import { Button } from "@/components/ui/button"
 import { ClickPassage } from "@/components/jlpt/click-passage"
+import { ExamClock } from "@/components/jlpt/exam-timer"
 import { ListeningCard } from "@/components/jlpt/listening-card"
 import { useJlptProgress } from "@/hooks/use-jlpt-progress"
 import { passedN2, scaleSection } from "@/lib/jlpt/progress"
@@ -13,12 +14,16 @@ import { cn } from "@/lib/utils"
 
 type Phase = "intro" | "language" | "reading" | "listening" | "result"
 
+const LANGUAGE_READING_SECONDS = 105 * 60
+const LISTENING_SECONDS = 50 * 60
+
 const LANGUAGE = GRAMMAR.slice(0, 12).map((item, index) => ({
   id: item.id,
   prompt: `${item.pattern} ၏ အဓိပ္ပာယ်နှင့် ကိုက်သော ဝါကျ`,
-  choices: item.examples.map((example) => example.ja).concat(
-    GRAMMAR[(index + 3) % GRAMMAR.length].examples[0].ja
-  ).slice(0, 3),
+  choices: item.examples
+    .map((example) => example.ja)
+    .concat(GRAMMAR[(index + 3) % GRAMMAR.length].examples[0].ja)
+    .slice(0, 3),
   answer: item.examples[0].ja,
 }))
 
@@ -31,8 +36,51 @@ export function ExamRunner() {
   const [readCorrect, setReadCorrect] = useState(0)
   const [listenCorrect, setListenCorrect] = useState(0)
   const [listenDone, setListenDone] = useState(0)
+  const [langReadLeft, setLangReadLeft] = useState(LANGUAGE_READING_SECONDS)
+  const [listenLeft, setListenLeft] = useState(LISTENING_SECONDS)
+  const recorded = useRef(false)
   const readingSet = useMemo(() => READINGS.slice(0, 4), [])
   const listeningSet = useMemo(() => LISTENING.slice(0, 6), [])
+
+  useEffect(() => {
+    if (phase !== "language" && phase !== "reading") return
+    const timer = window.setInterval(() => {
+      setLangReadLeft((value) => {
+        if (value <= 1) {
+          setPhase("listening")
+          return 0
+        }
+        return value - 1
+      })
+    }, 1000)
+    return () => window.clearInterval(timer)
+  }, [phase])
+
+  useEffect(() => {
+    if (phase !== "listening") return
+    const timer = window.setInterval(() => {
+      setListenLeft((value) => {
+        if (value <= 1) {
+          setPhase("result")
+          return 0
+        }
+        return value - 1
+      })
+    }, 1000)
+    return () => window.clearInterval(timer)
+  }, [phase])
+
+  useEffect(() => {
+    if (phase !== "result" || recorded.current) return
+    recorded.current = true
+    recordQuiz(
+      "exam",
+      scaleSection(langCorrect, LANGUAGE.length) +
+        scaleSection(readCorrect, readingSet.length) +
+        scaleSection(listenCorrect, listeningSet.length),
+      180
+    )
+  }, [phase, langCorrect, listenCorrect, readCorrect, readingSet.length, listeningSet.length, recordQuiz])
 
   const languageScore = scaleSection(langCorrect, LANGUAGE.length)
   const readingScore = scaleSection(readCorrect, readingSet.length)
@@ -44,12 +92,12 @@ export function ExamRunner() {
     return (
       <div className="grid gap-4 rounded-3xl bg-card p-5 ring-1 ring-foreground/8">
         <p className="my-script text-sm leading-relaxed">
-          အစစ်အမှန် N2 ပုံစံ — 言語知識・読解 ၁၀၅ မိနစ်၊ 聴解 ၅၀ မိနစ်။ ဤ simulator တွင် မေးခွန်းအရေအတွက် လျှော့ထားသော်လည်း အမှတ်ကို ၆၀/၆၀/၆၀ (စု ၁၈၀) သို့ စကေးချပြီး ဖြတ်မှတ် ၉၀ နှင့် ကဏ္ဍ ၁၉ ဖြင့် တိုင်းသည်။
+          အစစ်အမှန် N2 အချိန် — 言語知識・読解 ၁၀၅ မိနစ်၊ 聴解 ၅၀ မိနစ်။ မေးခွန်းအရေအတွက် လျှော့ထားသော်လည်း အမှတ်ကို ၆၀/၆၀/၆၀ (စု ၁၈၀) သို့ စကေးချပြီး ဖြတ်မှတ် ၉၀ နှင့် ကဏ္ဍ ၁၉ ဖြင့် တိုင်းသည်။ အချိန်ကုန်လျှင် နောက်ပိုင်းသို့ အလိုအလျောက် ရွေ့သည်။
         </p>
         <ul className="my-script grid gap-1 text-sm text-muted-foreground">
-          <li>言語知識 · {LANGUAGE.length} ပုဒ်</li>
+          <li>言語知識 · {LANGUAGE.length} ပုဒ် · စာမေးပွဲနာရီ ၁၀၅ မိနစ် (読解နှင့် မျှ)</li>
           <li>読解 · {readingSet.length} ပိုဒ်</li>
-          <li>聴解 · {listeningSet.length} ပုဒ်</li>
+          <li>聴解 · {listeningSet.length} ပုဒ် · ၅၀ မိနစ်</li>
         </ul>
         <Button className="h-12 rounded-2xl" onClick={() => setPhase("language")}>
           စတင်ရန်
@@ -62,6 +110,7 @@ export function ExamRunner() {
     const item = LANGUAGE[langIndex]
     return (
       <div className="grid gap-4">
+        <ExamClock seconds={langReadLeft} label="言語知識・読解 ၁၀၅ မိနစ်" />
         <p className="text-sm text-muted-foreground">
           言語知識 {langIndex + 1}/{LANGUAGE.length}
         </p>
@@ -96,6 +145,7 @@ export function ExamRunner() {
     const passage = readingSet[readIndex]
     return (
       <div className="grid gap-4">
+        <ExamClock seconds={langReadLeft} label="言語知識・読解 ၁၀၅ မိနစ်" />
         <p className="text-sm text-muted-foreground">
           読解 {readIndex + 1}/{readingSet.length}
         </p>
@@ -129,6 +179,7 @@ export function ExamRunner() {
     const item = listeningSet[listenDone] ?? listeningSet[0]
     return (
       <div className="grid gap-4">
+        <ExamClock seconds={listenLeft} label="聴解 ၅၀ မိနစ်" />
         <p className="text-sm text-muted-foreground">
           聴解 {Math.min(listenDone + 1, listeningSet.length)}/{listeningSet.length}
         </p>
@@ -141,7 +192,6 @@ export function ExamRunner() {
             setListenCorrect(nextCorrect)
             setListenDone(nextDone)
             if (nextDone >= listeningSet.length) {
-              recordQuiz("exam", scaleSection(langCorrect, LANGUAGE.length) + scaleSection(readCorrect, readingSet.length) + scaleSection(nextCorrect, listeningSet.length), 180)
               setPhase("result")
             }
           }}

@@ -5,9 +5,9 @@ export default function VocabPage() {
   return (
     <div>
       <ModuleHero
-        kicker="語彙"
-        title="N2 ဝေါဟာရ"
-        description="OpenJLPT N2 စာရင်း + N3 ပြန်လည်သုံးသပ်။ Furigana၊ 自動詞/他動詞 တဂ်၊ မြန်မာ/အင်္ဂလိပ် အဓိပ္ပာယ်။"
+        kicker="語彙 · Tango 2500"
+        title="N2 Tango ၂၅၀၀"
+        description="အခန်းနှင့် အပိုင်းအလိုက် (chapter / section)။ Furigana၊ 品詞၊ 自動詞/他動詞၊ မြန်မာအဓိပ္ပာယ်၊ ဥပမာဝါကျ အသံ။"
       />
       <VocabBrowser />
     </div>

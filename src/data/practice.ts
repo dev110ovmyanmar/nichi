@@ -61,6 +61,46 @@ export const NUANCE: NuancePair[] = [
       "べきだ က ကျင့်ဝတ်/အကြံပြု။ ざるを得ない က မလိုလားသော်လည်း ရွေးချယ်စရာမရှိ။",
     tipMy: "守るべきだ = စောင့်သင့်။ 中止せざるを得ない = ရပ်မှ ရမည်။",
   },
+  {
+    id: "ni-shite-wari",
+    title: "にしては vs わりに",
+    titleMy: "ဖြစ်သည့်အဖို့ (အံ့ဩ) vs မမျှ (အကဲဖြတ်)",
+    leftId: "ni-shite-wa",
+    rightId: "wari-ni",
+    differenceMy:
+      "にしては က မျှော်လင့်ချက်နှင့် မကိုက်သော အံ့ဩမှု (အစပြုသူဖြစ်သည့်အဖို့ ကျွမ်းကျင်)။ わりに က ဈေး/အဆင့်နှင့် မမျှဟု အကဲဖြတ်သည်။",
+    tipMy: "初心者にしては上手。値段のわりに美味しい。",
+  },
+  {
+    id: "totan-kaomou",
+    title: "たとたん vs かと思うと",
+    titleMy: "လုပ်လိုက်သည်နှင့် vs ထင်လိုက်သည်နှင့်",
+    leftId: "totan",
+    rightId: "ka-to-omou-to",
+    differenceMy:
+      "たとたん က လုပ်ဆောင်မှု ပြီးသည်နှင့် ချက်ချင်း နောက်ဖြစ်ရပ် (မထင်မှတ်)။ かと思うと က ထင်လိုက်သည်နှင့် ဆန့်ကျင်ဘက် ပြောင်းသည်။",
+    tipMy: "開けたとたん風。晴れたかと思うと雨。",
+  },
+  {
+    id: "osore-kanenai",
+    title: "恐れがある vs かねない",
+    titleMy: "အန္တရာယ် ရှိနိုင် vs မလိုလားအပ်သည် ဖြစ်နိုင်",
+    leftId: "osore",
+    rightId: "kanenai",
+    differenceMy:
+      "恐れがある က သတင်း/စာရွက်ပုံစံ အန္တရာယ် သတိပေး။ かねない က ပြောသူက မလိုလားသော ရလဒ် ဖြစ်နိုင်သည်ဟု ယူဆသည်။",
+    tipMy: "氾濫する恐れがある။ 事故を起こしかねない。",
+  },
+  {
+    id: "shika-zaru",
+    title: "しかない vs ざるを得ない",
+    titleMy: "ရွေးစရာမရှိ vs မလွှဲမရှောင်သာ (ပိုတရားဝင်)",
+    leftId: "shika-nai",
+    rightId: "zaru",
+    differenceMy:
+      "しかない က ရွေးချယ်စရာ တစ်ခုသာ။ ざるを得ない က မလိုလားသော်လည်း ဖိအားကြောင့် လုပ်ရသည် (ပိုတရားဝင်)။",
+    tipMy: "歩くしかない။ 中止せざるを得ない။",
+  },
 ]
 
 export const SORT_QUESTIONS: SortQuestion[] = [
@@ -159,5 +199,53 @@ export const SORT_QUESTIONS: SortQuestion[] = [
     answer: ["とおりに"],
     translationMy: "ညွှန်ကြားစာအတိုင်း တပ်ဆင်ပါ။",
     grammarId: "toori",
+  },
+  {
+    id: "s13",
+    promptMy: "「窓を開けた ★ 、風が入ってきた。」",
+    tokens: ["とたん", "ところ", "最中", "限り"],
+    answer: ["とたん"],
+    translationMy: "ပြတင်းပေါက် ဖွင့်လိုက်သည်နှင့် လေဝင်လာသည်။",
+    grammarId: "totan",
+  },
+  {
+    id: "s14",
+    promptMy: "「分かり ★ 、連絡します。」",
+    tokens: ["次第", "次第で", "たびに", "とともに"],
+    answer: ["次第"],
+    translationMy: "သိသည်နှင့် ချက်ချင်း ဆက်သွယ်မည်။",
+    grammarId: "shidai",
+  },
+  {
+    id: "s15",
+    promptMy: "「安い ★ 、質が悪いとは限らない。」",
+    tokens: ["からといって", "からして", "からすると", "からには"],
+    answer: ["からといって"],
+    translationMy: "စျေးပေါသည်ဟု ဆို၍ အရည်အသွေး မကောင်းဟု မဆိုနိုင်။",
+    grammarId: "kara-to-itte",
+  },
+  {
+    id: "s16",
+    promptMy: "「忙しい日 ★ 客が来る。」",
+    tokens: ["に限って", "に限らず", "に限り", "にかけて"],
+    answer: ["に限って"],
+    translationMy: "အလုပ်ရှုပ်သောနေ့မှသာ ဧည့်သည် လာသည်။",
+    grammarId: "kagiri-2",
+  },
+  {
+    id: "s17",
+    promptMy: "「許可をもらって ★ 入れない。」",
+    tokens: ["からでないと", "からには", "からして", "からといって"],
+    answer: ["からでないと"],
+    translationMy: "ခွင့်မရသေးလျှင် ဝင်၍မရ။",
+    grammarId: "te-kara-denai",
+  },
+  {
+    id: "s18",
+    promptMy: "「習う ★ 楽になる。」",
+    tokens: ["につれて", "に対して", "にとって", "に関して"],
+    answer: ["につれて"],
+    translationMy: "သင်သည်နှင့်အမျှ လွယ်လာသည်။",
+    grammarId: "ni-tsurete",
   },
 ]

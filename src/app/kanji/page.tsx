@@ -5,9 +5,9 @@ export default function KanjiPage() {
   return (
     <div>
       <ModuleHero
-        kicker="漢字"
-        title="N2 漢字 ၃၆၇ လုံး"
-        description="On/Kun၊ စုတ်ချက်အရေအတွက်၊ KanjiVG stroke order နှင့် ကိုယ်တိုင်ရေးလေ့ကျင့်ခန်း။"
+        kicker="漢字 · Kanji Master"
+        title="Kanji Master N2"
+        description="အခန်းလိုက် 音訓၊ 部首၊ စုတ်ချက်အစီအစဉ်၊ 熟語၊ ဥပမာဝါကျနှင့် အခန်း-အဆုံး quiz။"
       />
       <KanjiBrowser />
     </div>

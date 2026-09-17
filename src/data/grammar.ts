@@ -1,6 +1,7 @@
 import type { GrammarEntry } from "@/lib/jlpt/types"
+import { GRAMMAR_EXTRA } from "@/data/grammar-extra"
 
-export const GRAMMAR: GrammarEntry[] = [
+export const GRAMMAR_CORE: GrammarEntry[] = [
   {
     id: "kanenai",
     pattern: "〜かねない",
@@ -1106,6 +1107,8 @@ export const GRAMMAR: GrammarEntry[] = [
     tags: ["command"],
   },
 ]
+
+export const GRAMMAR: GrammarEntry[] = [...GRAMMAR_CORE, ...GRAMMAR_EXTRA]
 
 export function grammarById(id: string) {
   return GRAMMAR.find((item) => item.id === id) ?? null
