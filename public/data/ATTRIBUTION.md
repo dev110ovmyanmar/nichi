@@ -18,6 +18,9 @@ https://creativecommons.org/licenses/by-sa/4.0/
 Week/day shells follow the pedagogical layout of
 日本語総まとめ N2 漢字 and 日本語総まとめ N2 語彙 (Ask Publishing).
 Textbook lists and sentences are not copied.
+Kanji are placed by real-world scene (signs, machines, notices, news).
+Vocab is placed by Japanese stems on those same public day titles.
+Scene example sentences in the app are original Nichi copy.
 https://www.ask-books.com/jlpt/n2/
 
 Burmese explanations, grammar notes, reading passages, listening scripts,

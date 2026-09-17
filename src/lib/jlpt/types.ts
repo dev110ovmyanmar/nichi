@@ -48,7 +48,10 @@ export type CurriculumSection = {
   number: number
   titleJa: string
   titleMy: string
+  /** Japanese stems used to place OpenJLPT entries on this day. */
   keywords: string[]
+  introJa?: string
+  introMy?: string
 }
 
 export type CurriculumChapter = {

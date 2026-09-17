@@ -67,37 +67,55 @@ export default function KanjiChapterPage({
                   {section.titleMy}
                 </span>
               </h2>
+              {section.introJa && !practice ? (
+                <p className="rounded-2xl bg-muted/40 px-3 py-2 text-sm leading-6">
+                  {section.introJa}
+                  <span className="my-script mt-1 block text-xs text-muted-foreground">
+                    {section.introMy}
+                  </span>
+                </p>
+              ) : null}
               {practice ? (
                 <Link
                   href={`/kanji/ch/${chapter.id}/quiz`}
                   className="rounded-3xl bg-card p-4 ring-1 ring-foreground/8"
                 >
-                  <p className="font-medium">ဤအပတ် 漢字 ကို quiz ဖြင့် စစ်ပါ။</p>
-                  <p className="mt-1 text-sm text-muted-foreground">
+                  <p className="font-medium">この週の漢字を実戦問題で確認します。</p>
+                  <p className="my-script mt-1 text-sm text-muted-foreground">
                     အဓိပ္ပာယ်၊ 音読み၊ 星問題 熟語 · ၇၀% အထက် ရရင် အပတ် ပြီးဆုံး။
                   </p>
                 </Link>
               ) : (
-                <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4">
+                <div className="grid gap-2">
                   {kanji.length ? (
                     kanji.map((item) => (
                       <article
                         key={item.id}
-                        className="rounded-3xl bg-card p-3 ring-1 ring-foreground/8"
+                        className="rounded-3xl bg-card p-3 ring-1 ring-foreground/8 sm:p-4"
                       >
-                        <Link href={entryHref("/kanji", item.id)} className="block text-center">
-                          <span className="font-heading text-4xl">{item.character}</span>
-                          <span className="mt-1 block text-[11px] text-muted-foreground">
-                            {item.strokes}画 · {item.radical}
-                          </span>
-                          <span className="mt-1 block line-clamp-2 text-xs">
-                            {displayMeaning(item.meanings, item.meaningMy)}
-                          </span>
-                          <span className="mt-1 block text-[11px] text-muted-foreground">
-                            音 {item.onyomi.slice(0, 2).join("、") || "—"}
-                          </span>
-                        </Link>
-                        <div className="mt-2 flex justify-center">
+                        <div className="flex items-start gap-3">
+                          <Link
+                            href={entryHref("/kanji", item.id)}
+                            className="font-heading w-16 shrink-0 text-center text-4xl leading-none sm:w-20 sm:text-5xl"
+                          >
+                            {item.character}
+                          </Link>
+                          <div className="min-w-0 flex-1">
+                            <Link href={entryHref("/kanji", item.id)} className="block">
+                              <p className="text-xs text-muted-foreground">
+                                音 {item.onyomi.slice(0, 2).join("・") || "—"}
+                                <span className="mx-1">/</span>
+                                訓 {item.kunyomi.slice(0, 2).join("・") || "—"}
+                              </p>
+                              <p className="mt-1 text-sm font-medium">
+                                {item.compounds?.slice(0, 3).join("・") || "—"}
+                              </p>
+                              <p className="mt-1 text-xs text-muted-foreground">
+                                {displayMeaning(item.meanings, item.meaningMy)}
+                                <span className="ml-2">{item.strokes}画</span>
+                              </p>
+                            </Link>
+                          </div>
                           <BookmarkButton
                             active={progress.bookmarks.kanji.includes(item.id)}
                             onClick={() => toggleBookmark("kanji", item.id)}
@@ -107,9 +125,7 @@ export default function KanjiChapterPage({
                       </article>
                     ))
                   ) : (
-                    <p className="col-span-full text-sm text-muted-foreground">
-                      ဤနေ့အတွက် 漢字 မရှိသေးပါ။
-                    </p>
+                    <p className="text-sm text-muted-foreground">ဤနေ့အတွက် 漢字 မရှိသေးပါ။</p>
                   )}
                 </div>
               )}

@@ -70,6 +70,14 @@ export default function TangoChapterPage({
                   {section.titleMy}
                 </span>
               </h2>
+              {section.introJa && !isPracticeSection(section) ? (
+                <p className="rounded-2xl bg-muted/40 px-3 py-2 text-sm leading-6">
+                  {section.introJa}
+                  <span className="my-script mt-1 block text-xs text-muted-foreground">
+                    {section.introMy}
+                  </span>
+                </p>
+              ) : null}
               {isPracticeSection(section) ? (
                 <Link
                   href={`/vocab/ch/${chapter.id}/quiz`}

@@ -2,7 +2,7 @@
 
 Local-first JLPT N2 prep for Myanmar learners: **総まとめ N2 語彙**, **総まとめ N2 漢字**, 170+ grammar patterns, reading, listening, a timed mock exam, and a daily study journal. Explanations are in **မြန်မာ** and Japanese. Nothing is uploaded.
 
-Both 語彙 and 漢字 follow the 8-week × 7-day layout of *日本語総まとめ N2* (Ask Publishing). Word lists, readings, stroke diagrams, and example sentences come from open dictionaries — not from those publications.
+Both 語彙 and 漢字 follow the 8-week × 7-day layout of *日本語総まとめ N2* (Ask Publishing). Each day is a scene (signs, ATM, アパート探し, 副詞…). Kanji are hand-placed by how they appear in that scene; vocab is placed by Japanese stems. Lists, readings, stroke diagrams, and example sentences come from open dictionaries and original scene sentences — not from those publications.
 
 ## Modules
 

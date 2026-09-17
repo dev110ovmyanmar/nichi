@@ -81,6 +81,10 @@ export default function KanjiDetailPage({
       <AudioPlayer text={speakText} label="読み" />
       <div className="grid gap-1 text-sm">
         <p>
+          <span className="text-muted-foreground">この場面の熟語 · </span>
+          {item.compounds?.length ? item.compounds.slice(0, 4).join("・") : "—"}
+        </p>
+        <p>
           <span className="text-muted-foreground">音読み · </span>
           {item.onyomi.join("、") || "—"}
         </p>
@@ -138,7 +142,8 @@ export default function KanjiDetailPage({
         </div>
       </section>
       <section>
-        <h2 className="font-heading text-base font-semibold">熟語</h2>
+        <h2 className="font-heading text-base font-semibold">この場面の熟語</h2>
+        <p className="mt-2 text-sm">{item.compounds?.join("・") || "—"}</p>
         <ul className="mt-2 grid gap-2">
           {compounds.map((word) => (
             <li key={word.id}>

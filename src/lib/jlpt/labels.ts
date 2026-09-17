@@ -10,5 +10,5 @@ export function sectionUnitLabel(chapter: CurriculumChapter, section: Curriculum
 }
 
 export function isPracticeSection(section: CurriculumSection) {
-  return section.keywords.length === 0
+  return section.number === 7 || section.titleJa.includes("実戦")
 }

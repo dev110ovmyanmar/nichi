@@ -1,177 +1,539 @@
-"""Place each N2 kanji on a 総まとめ scene day by KANJIDIC2 meaning.
+"""Hand-place every OpenJLPT N2 kanji on a 総まとめ scene day.
 
-Does not copy Ask Publishing lists. Caps each study day so leftovers are
-not dumped into week 8."""
+Assignment is by real-world Japanese use (signs, machines, notices, news),
+not English keyword leftovers and not Ask Publishing word lists.
+"""
 
 from __future__ import annotations
 
 import json
-import re
 from collections import Counter
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-items = json.loads((ROOT / "public/data/kanji.json").read_text())
-OUT = ROOT / "src/data/soumatome-kanji-map.ts"
+KANJI = json.loads((ROOT / "public/data/kanji.json").read_text())
+VOCAB = json.loads((ROOT / "public/data/vocab.json").read_text())
 
-# Seed characters that clearly belong on a scene day.
-SEEDS: list[tuple[str, str]] = [
-    ("k01-d1", "禁停駐令則符印札"),
-    ("k01-d2", "階門戸層床隅奥央"),
-    ("k01-d3", "設築柱塔城殿宇造"),
-    ("k01-d4", "線券改橋陸延順各"),
-    ("k01-d5", "輸航鉄輪舟隻荷泊"),
-    ("k01-d6", "郵療患胃臓血毒届"),
-    ("k02-d1", "械販換個枚片双包"),
-    ("k02-d2", "預貯貨替億倍均算"),
-    ("k02-d3", "缶瓶液喫菓溶沸蒸"),
-    ("k02-d4", "灯針筒圧乾湿凍燃"),
-    ("k02-d5", "接触召叫絡伸傾"),
-    ("k02-d6", "録編複版刷刊捜棒"),
-    ("k03-d1", "税額領再翌承封"),
-    ("k03-d2", "跡裏底辺囲郊坂"),
-    ("k03-d3", "袋濯衣帽布糸綿"),
-    ("k03-d4", "汚捨掃灰枯燥埋"),
-    ("k03-d5", "希依紹効了略復"),
-    ("k03-d6", "簡副旧省庁署"),
-    ("k04-d1", "姓籍巻歴筆著誌"),
-    ("k04-d2", "敬拝伺贈署"),
-    ("k04-d3", "章詞述簡"),
-    ("k04-d4", "敬拝"),
-    ("k04-d5", "課採卒訓"),
-    ("k04-d6", "章詞述"),
-    ("k05-d1", "湯焼氷炭"),
-    ("k05-d2", "皿帽畳机"),
-    ("k05-d3", "粉磨"),
-    ("k05-d4", "悩肌膚汗涙乳"),
-    ("k05-d5", "塩油粉卵菜麦甘辛"),
-    ("k05-d6", "濃薄脂粒浴泉涼滴"),
-    ("k06-d1", "賞祭"),
-    ("k06-d2", "営"),
-    ("k06-d3", "祝踊劇芸像"),
-    ("k06-d4", "谷森林岸湾湖河島"),
-    ("k06-d5", "仏宝"),
-    ("k06-d6", "比均超並競"),
-    ("k07-d1", "募雇採講"),
-    ("k07-d2", "庁署区村"),
-    ("k07-d3", "含材"),
-    ("k07-d4", "童幼"),
-    ("k07-d5", "損爆乱暴"),
-    ("k07-d6", "雲曇震涼波"),
-    ("k08-d1", "党軍勢減増"),
-    ("k08-d2", "協総府県査委"),
-    ("k08-d3", "革域境導欧"),
-    ("k08-d4", "農貿鉱営暴乱"),
-    ("k08-d5", "税経環防補"),
-    ("k08-d6", "科学宇星技"),
-]
-
-THEMES: dict[str, str] = {
-    "k01-d1": "prohibition ban forbid halt stopping park reside decree orders laws rule seal stamp tag placard token sign warning",
-    "k01-d2": "storey stair floor door gate corner nook interior heart center middle layer story eaves tatami desk table bed flats",
-    "k01-d3": "establishment build construct pillar pagoda tower castle mansion palace eaves roof house enclose surround paint",
-    "k01-d4": "line track ticket reformation change bridge land delay schedule each every order turn station",
-    "k01-d5": "transport navigate sail iron wheel boat ship vessel baggage freight overnight ride vehicle",
-    "k01-d6": "mail hospital heal cure disease ill stomach viscera blood poison deliver report nurse medicine",
-    "k02-d1": "machine instrument marketing sell interchange individual sheet pair wrap pack ticket",
-    "k02-d2": "deposit savings freight goods exchange hundred million double average calculate money bank",
-    "k02-d3": "can bottle liquid consume eat drink candy melt boil steam juice vending",
-    "k02-d4": "lamp light needle pipe pressure dry damp frozen burn heat remote switch",
-    "k02-d5": "touch contact call shout entwine expand lean phone hold",
-    "k02-d6": "record compile duplicate printing print search rod computer file screen",
-    "k03-d1": "tax amount jurisdiction again following next seal closing bill fee transfer",
-    "k03-d2": "tracks back reverse bottom vicinity outskirts suburbs slope absent away",
-    "k03-d3": "sack bag laundry garment cap linen cloth thread cotton keep receipt coupon",
-    "k03-d4": "dirty pollute discard sweep ashes wither parch bury garbage waste recycle burn",
-    "k03-d5": "hope request introduce merit complete abbreviation restore notice confirm",
-    "k03-d6": "simplicity vice former ministry government office signature police valid expire",
-    "k04-d1": "surname enroll register scroll volume history curriculum write document records form apply",
-    "k04-d2": "certificate resume prove identity copy respect pray present award signature",
-    "k04-d3": "badge chapter composition words poetry mention state mail postcard letter",
-    "k04-d4": "business company regard attach meeting please contact respect pray visit",
-    "k04-d5": "chapter lesson exam answer score grade test question graduate instruction",
-    "k04-d6": "essay compose opinion reason example conclude write composition poem",
-    "k05-d1": "hot water bath bake ice charcoal fire heat boil steam warm",
-    "k05-d2": "dish plate cap tatami desk table furniture tool box home",
-    "k05-d3": "flour powder grind polish wash soap clean laundry dirt stain",
-    "k05-d4": "worry pain skin sweat tears milk medicine sick symptom heal dose",
-    "k05-d5": "salt oil egg vegetable wheat sweet spicy food taste fresh ingredient sugar meat fish rice",
-    "k05-d6": "concentrated dilute fat grains bathe spring cool drip button intercom",
-    "k06-d1": "prize reward sale discount special free limited advertisement flyer",
-    "k06-d2": "camp conduct business shop store open closed floor guide bargain",
-    "k06-d3": "celebrate dance drama play technique art statue event festival hold join",
-    "k06-d4": "valley forest woods beach gulf lake river island map north south east west slope hill",
-    "k06-d5": "buddha treasure temple exhibit museum culture history ritual",
-    "k06-d6": "compare average transcend row equal emulate compete choice same different",
-    "k07-d1": "recruit hire employ lecture apply job salary work staff want campaign",
-    "k07-d2": "government office police ward village town community local newspaper region",
-    "k07-d3": "contain lumber ingredients menu calorie allergy taste",
-    "k07-d4": "juvenile infancy childhood exam entrance school test pass fail",
-    "k07-d5": "damage bomb riot war disorder traffic accident delay closed route",
-    "k07-d6": "cloud cloudy quake cool waves weather rain snow wind storm typhoon temperature",
-    "k08-d1": "party faction news breaking report urgent update now",
-    "k08-d2": "cooperation general prefecture investigate committee headline title increase decrease record",
-    "k08-d3": "reform range boundary guidance europe agree oppose plan decide start end",
-    "k08-d4": "society public government law crime police right citizen army force troops",
-    "k08-d5": "economy company market environment earth protect pollution energy tax agriculture trade",
-    "k08-d6": "science space world nation develop technology research international star",
+# Unique: every N2 character appears on exactly one study day.
+DAYS: dict[str, str] = {
+    "k01-d1": "禁停駐令則札捨拾占固",
+    "k01-d2": "階門戸層床隅奥央",
+    "k01-d3": "設築柱塔造軒庫囲",
+    "k01-d4": "線券改橋陸延順各",
+    "k01-d5": "輸航鉄輪舟隻荷泊挟",
+    "k01-d6": "郵療患胃臓血毒届",
+    "k02-d1": "械販換個枚片双包",
+    "k02-d2": "預貯貨替億倍均算",
+    "k02-d3": "缶瓶液喫菓溶沸蒸",
+    "k02-d4": "灯針筒圧乾湿凍温",
+    "k02-d5": "接触召叫絡伸傾帯",
+    "k02-d6": "録編複版刷刊",
+    "k03-d1": "税額領再翌承封量兆",
+    "k03-d2": "跡裏底辺郊坂詰仲",
+    "k03-d3": "贈袋衣帽布糸綿濯",
+    "k03-d4": "汚掃灰枯燥埋燃掘",
+    "k03-d5": "希依紹効了略復簡",
+    "k03-d6": "副旧省庁署永細",
+    "k04-d1": "姓籍巻歴筆著誌冊",
+    "k04-d2": "敬拝伺績訓専周史",
+    "k04-d3": "章詞述印快純符",
+    "k04-d4": "諸般介担照巨",
+    "k04-d5": "練賢鋭肯久普",
+    "k04-d6": "況恋勇柔孫",
+    "k05-d1": "湯焼氷炭浴泉滴",
+    "k05-d2": "皿畳机棒蔵角",
+    "k05-d3": "粉磨薄濃干塗泥軟肌膚皮毛",
+    "k05-d4": "悩汗涙乳鼻粒骨肩腰胸",
+    "k05-d5": "塩油卵菜麦甘辛脂",
+    "k05-d6": "秒管捜零型",
+    "k06-d1": "賞祭超並競低営豊",
+    "k06-d2": "幅群栄根丸玉装",
+    "k06-d3": "祝踊劇芸香咲紅珍",
+    "k06-d4": "谷森林岸湾湖河島砂浅",
+    "k06-d5": "仏宝寺城殿祈尊像",
+    "k06-d6": "比極軽弱硬短鈍",
+    "k07-d1": "募雇講腕採準",
+    "k07-d2": "区村板池岩竹",
+    "k07-d3": "含材貝匹畜虫羽刺",
+    "k07-d4": "童幼齢児卒課",
+    "k07-d5": "損爆乱混逆移黄",
+    "k07-d6": "雲曇震涼波季昇沈荒暴",
+    "k08-d1": "党軍勢減団兵武将",
+    "k08-d2": "協総府県査委防補",
+    "k08-d3": "革域境導欧州農貿",
+    "k08-d4": "被臣律厚憎",
+    "k08-d5": "植清鉱漁耕緑枝",
+    "k08-d6": "宇星技象測脳銅",
 }
 
-DAYS = [f"k{w:02d}-d{d}" for w in range(1, 9) for d in range(1, 7)]
-CAP = 9
-char_set = {item["character"] for item in items}
+# Common Japanese compounds for the scene (JMdict-style), not textbook copy.
+PREFERRED: dict[str, list[str]] = {
+    "禁": ["禁止", "禁煙"],
+    "停": ["停車", "停電", "停止"],
+    "駐": ["駐車", "駐輪"],
+    "令": ["条例", "命令"],
+    "則": ["規則"],
+    "札": ["名札", "札"],
+    "捨": ["捨てる"],
+    "拾": ["拾う", "拾得"],
+    "占": ["占用"],
+    "固": ["固定", "固体"],
+    "階": ["階段", "階"],
+    "門": ["正門", "入門"],
+    "戸": ["戸締まり", "戸"],
+    "層": ["階層", "高層"],
+    "床": ["床", "起床"],
+    "隅": ["隅"],
+    "奥": ["奥", "奥行"],
+    "央": ["中央"],
+    "設": ["設備", "設置"],
+    "築": ["建築", "新築"],
+    "柱": ["電柱", "柱"],
+    "塔": ["塔"],
+    "造": ["構造", "改造"],
+    "軒": ["一軒"],
+    "庫": ["倉庫", "金庫"],
+    "囲": ["周囲", "囲む"],
+    "線": ["路線", "線路"],
+    "券": ["乗車券", "券売機"],
+    "改": ["改札", "改善"],
+    "橋": ["鉄橋", "橋"],
+    "陸": ["着陸", "陸上"],
+    "延": ["延着", "延期"],
+    "順": ["順序", "順調"],
+    "各": ["各駅", "各自"],
+    "輸": ["輸送", "輸入"],
+    "航": ["航空", "航海"],
+    "鉄": ["鉄道", "地下鉄"],
+    "輪": ["車輪", "輪"],
+    "舟": ["舟"],
+    "隻": ["一隻"],
+    "荷": ["荷物"],
+    "泊": ["宿泊", "泊まる"],
+    "挟": ["挟む"],
+    "郵": ["郵便", "郵送"],
+    "療": ["治療", "医療"],
+    "患": ["患者"],
+    "胃": ["胃腸", "胃痛"],
+    "臓": ["内臓", "心臓"],
+    "血": ["血液", "出血"],
+    "毒": ["中毒", "有毒"],
+    "届": ["届ける", "届く"],
+    "械": ["機械"],
+    "販": ["販売", "自動販売機"],
+    "換": ["交換", "乗換"],
+    "個": ["個人", "個数"],
+    "枚": ["一枚"],
+    "片": ["片方"],
+    "双": ["双方"],
+    "包": ["包装", "包む"],
+    "預": ["預金", "預ける"],
+    "貯": ["貯金", "貯蓄"],
+    "貨": ["貨幣", "貨物"],
+    "替": ["両替", "交替"],
+    "億": ["億"],
+    "倍": ["倍"],
+    "均": ["平均"],
+    "算": ["計算"],
+    "缶": ["缶"],
+    "瓶": ["瓶"],
+    "液": ["液体"],
+    "喫": ["喫茶"],
+    "菓": ["菓子"],
+    "溶": ["溶ける"],
+    "沸": ["沸騰", "沸かす"],
+    "蒸": ["蒸気", "蒸す"],
+    "灯": ["点灯", "電灯"],
+    "針": ["針", "方針"],
+    "筒": ["封筒"],
+    "圧": ["圧力"],
+    "乾": ["乾燥"],
+    "湿": ["湿気"],
+    "凍": ["冷凍", "凍る"],
+    "温": ["温度", "保温"],
+    "接": ["接続", "面接"],
+    "触": ["触る", "接触"],
+    "召": ["召集"],
+    "叫": ["叫ぶ"],
+    "絡": ["連絡"],
+    "伸": ["伸びる"],
+    "傾": ["傾く"],
+    "帯": ["携帯", "一帯"],
+    "録": ["録音", "記録"],
+    "編": ["編集"],
+    "複": ["複製", "複雑"],
+    "版": ["版"],
+    "刷": ["印刷"],
+    "刊": ["刊行"],
+    "税": ["税金", "消費税"],
+    "額": ["金額", "額"],
+    "領": ["領収", "領事"],
+    "再": ["再度", "再発行"],
+    "翌": ["翌日", "翌月"],
+    "承": ["承知", "承認"],
+    "封": ["封筒", "封印"],
+    "量": ["量", "容量"],
+    "兆": ["兆"],
+    "跡": ["跡", "足跡"],
+    "裏": ["裏", "裏面"],
+    "底": ["底"],
+    "辺": ["辺り", "周辺"],
+    "郊": ["郊外"],
+    "坂": ["坂"],
+    "詰": ["詰まる", "詰める"],
+    "仲": ["仲間", "仲"],
+    "贈": ["贈る", "贈呈"],
+    "袋": ["袋"],
+    "衣": ["衣服"],
+    "帽": ["帽子"],
+    "布": ["布"],
+    "糸": ["糸"],
+    "綿": ["綿"],
+    "濯": ["洗濯"],
+    "汚": ["汚染", "汚い"],
+    "掃": ["掃除"],
+    "灰": ["灰"],
+    "枯": ["枯れる"],
+    "燥": ["乾燥"],
+    "埋": ["埋める"],
+    "燃": ["燃焼", "可燃"],
+    "掘": ["掘る"],
+    "希": ["希望"],
+    "依": ["依頼"],
+    "紹": ["紹介"],
+    "効": ["効果", "有効"],
+    "了": ["完了", "了解"],
+    "略": ["省略"],
+    "復": ["回復", "復習"],
+    "簡": ["簡単", "簡易"],
+    "副": ["副"],
+    "旧": ["旧"],
+    "省": ["省く", "省"],
+    "庁": ["庁"],
+    "署": ["署名", "署"],
+    "永": ["永久"],
+    "細": ["詳細", "細い"],
+    "姓": ["姓名", "姓"],
+    "籍": ["戸籍", "国籍"],
+    "巻": ["巻"],
+    "歴": ["履歴", "歴史"],
+    "筆": ["筆記", "筆"],
+    "著": ["著者", "著名"],
+    "誌": ["雑誌"],
+    "冊": ["冊"],
+    "敬": ["敬意", "尊敬"],
+    "拝": ["拝見"],
+    "伺": ["伺う"],
+    "績": ["成績"],
+    "訓": ["訓読み", "訓練"],
+    "専": ["専門"],
+    "周": ["周囲", "一周"],
+    "史": ["歴史"],
+    "章": ["文章", "章"],
+    "詞": ["歌詞", "詞"],
+    "述": ["述べる", "記述"],
+    "印": ["印刷", "印"],
+    "快": ["快適", "愉快"],
+    "純": ["純粋"],
+    "符": ["符号"],
+    "諸": ["諸"],
+    "般": ["一般"],
+    "介": ["紹介", "介する"],
+    "担": ["担当"],
+    "照": ["参照", "照明"],
+    "巨": ["巨大"],
+    "練": ["練習"],
+    "賢": ["賢い"],
+    "鋭": ["鋭い"],
+    "肯": ["肯定"],
+    "久": ["長久"],
+    "普": ["普通"],
+    "況": ["状況"],
+    "恋": ["恋愛"],
+    "勇": ["勇気"],
+    "柔": ["柔軟"],
+    "孫": ["孫"],
+    "湯": ["湯", "給湯"],
+    "焼": ["焼く", "燃焼"],
+    "氷": ["氷"],
+    "炭": ["炭"],
+    "浴": ["入浴", "浴室"],
+    "泉": ["温泉"],
+    "滴": ["水滴"],
+    "皿": ["皿"],
+    "畳": ["畳"],
+    "机": ["机"],
+    "棒": ["棒"],
+    "蔵": ["冷蔵庫", "貯蔵"],
+    "角": ["角", "角度"],
+    "粉": ["粉"],
+    "磨": ["磨く"],
+    "薄": ["薄い"],
+    "濃": ["濃い"],
+    "干": ["干物", "干す"],
+    "塗": ["塗る"],
+    "泥": ["泥"],
+    "軟": ["軟らかい"],
+    "肌": ["肌"],
+    "膚": ["皮膚"],
+    "皮": ["皮"],
+    "毛": ["毛"],
+    "悩": ["悩む", "煩悩"],
+    "汗": ["汗"],
+    "涙": ["涙"],
+    "乳": ["牛乳"],
+    "鼻": ["鼻"],
+    "粒": ["粒"],
+    "骨": ["骨"],
+    "肩": ["肩"],
+    "腰": ["腰"],
+    "胸": ["胸"],
+    "塩": ["塩"],
+    "油": ["油"],
+    "卵": ["卵"],
+    "菜": ["野菜"],
+    "麦": ["麦"],
+    "甘": ["甘い"],
+    "辛": ["辛い"],
+    "脂": ["脂肪"],
+    "秒": ["秒"],
+    "管": ["管理"],
+    "捜": ["捜索", "捜す"],
+    "零": ["零"],
+    "型": ["型"],
+    "賞": ["賞品", "懸賞"],
+    "祭": ["祭", "文化祭"],
+    "超": ["超"],
+    "並": ["並"],
+    "競": ["競争"],
+    "低": ["低い", "低下"],
+    "営": ["営業"],
+    "豊": ["豊富"],
+    "幅": ["幅"],
+    "群": ["群"],
+    "栄": ["栄養", "繁栄"],
+    "根": ["根"],
+    "丸": ["丸"],
+    "玉": ["玉"],
+    "装": ["装置", "服装"],
+    "祝": ["祝う", "祝福"],
+    "踊": ["踊る"],
+    "劇": ["劇"],
+    "芸": ["芸術"],
+    "香": ["香"],
+    "咲": ["咲く"],
+    "紅": ["紅葉"],
+    "珍": ["珍しい"],
+    "谷": ["谷"],
+    "森": ["森"],
+    "林": ["林"],
+    "岸": ["岸"],
+    "湾": ["湾"],
+    "湖": ["湖"],
+    "河": ["河"],
+    "島": ["島"],
+    "砂": ["砂"],
+    "浅": ["浅い"],
+    "仏": ["仏"],
+    "宝": ["宝物"],
+    "寺": ["寺"],
+    "城": ["城"],
+    "殿": ["殿"],
+    "祈": ["祈る"],
+    "尊": ["尊敬"],
+    "像": ["像"],
+    "比": ["比較"],
+    "極": ["極端"],
+    "軽": ["軽い"],
+    "弱": ["弱い"],
+    "硬": ["硬い"],
+    "短": ["短い"],
+    "鈍": ["鈍い"],
+    "募": ["募集"],
+    "雇": ["雇う"],
+    "講": ["講義", "講演"],
+    "腕": ["腕"],
+    "採": ["採用"],
+    "準": ["準備", "標準"],
+    "区": ["区"],
+    "村": ["村"],
+    "板": ["掲示板", "看板"],
+    "池": ["池"],
+    "岩": ["岩"],
+    "竹": ["竹"],
+    "含": ["含む", "含有"],
+    "材": ["材料"],
+    "貝": ["貝"],
+    "匹": ["匹"],
+    "畜": ["家畜"],
+    "虫": ["虫"],
+    "羽": ["羽"],
+    "刺": ["刺す"],
+    "童": ["児童"],
+    "幼": ["幼児"],
+    "齢": ["年齢"],
+    "児": ["児童"],
+    "卒": ["卒業"],
+    "課": ["課題", "課"],
+    "損": ["損害"],
+    "爆": ["爆発"],
+    "乱": ["混乱"],
+    "混": ["混雑", "混乱"],
+    "逆": ["逆"],
+    "移": ["移動", "移転"],
+    "黄": ["黄色"],
+    "雲": ["雲"],
+    "曇": ["曇り"],
+    "震": ["地震"],
+    "涼": ["涼しい"],
+    "波": ["波"],
+    "季": ["季節"],
+    "昇": ["上昇"],
+    "沈": ["沈む"],
+    "荒": ["荒れる"],
+    "暴": ["暴風", "暴力"],
+    "党": ["政党"],
+    "軍": ["軍隊"],
+    "勢": ["姿勢", "勢力"],
+    "減": ["減少"],
+    "団": ["団体"],
+    "兵": ["兵士"],
+    "武": ["武力"],
+    "将": ["将来"],
+    "協": ["協力", "協定"],
+    "総": ["総合", "総"],
+    "府": ["府"],
+    "県": ["県"],
+    "査": ["調査"],
+    "委": ["委員"],
+    "防": ["予防", "防止"],
+    "補": ["補助"],
+    "革": ["改革"],
+    "域": ["地域"],
+    "境": ["環境", "国境"],
+    "導": ["指導"],
+    "欧": ["欧州"],
+    "州": ["州"],
+    "農": ["農業"],
+    "貿": ["貿易"],
+    "被": ["被害"],
+    "臣": ["大臣"],
+    "律": ["法律"],
+    "厚": ["厚生"],
+    "憎": ["憎む"],
+    "植": ["植物", "植える"],
+    "清": ["清潔"],
+    "鉱": ["鉱物"],
+    "漁": ["漁業"],
+    "耕": ["耕作"],
+    "緑": ["緑"],
+    "枝": ["枝"],
+    "宇": ["宇宙"],
+    "星": ["星"],
+    "技": ["技術"],
+    "象": ["現象"],
+    "測": ["測定", "観測"],
+    "脳": ["脳"],
+    "銅": ["銅"],
+}
 
+TEMPLATES: dict[str, tuple[str, str, str]] = {
+    "k01-d1": ("「{c}」と書かれた立て札がある。", 'A sign reads "{c}".', "「{c}」ဟု ရေးထားသော ဆိုင်းဘုတ် ရှိသည်။"),
+    "k01-d2": ("建物の中に「{c}」の表示がある。", 'Inside the building there is a "{c}" sign.', "အဆောက်အအုံတွင်း 「{c}」 ဖော်ပြချက် ရှိသည်။"),
+    "k01-d3": ("建物の内外で「{c}」をよく見る。", 'You often see "{c}" around the building.', "အဆောက်အအုံ အနီး 「{c}」 ကို မကြာခဏ တွေ့ရသည်။"),
+    "k01-d4": ("駅で「{c}」を確認する。", 'Check "{c}" at the station.', "ဘူတာတွင် 「{c}」 ကို စစ်သည်။"),
+    "k01-d5": ("乗り物の中に「{c}」と書いてある。", 'On the vehicle it says "{c}".', "ယာဉ်ပေါ်တွင် 「{c}」 ဟု ရေးထားသည်။"),
+    "k01-d6": ("郵便局や病院で「{c}」を見る。", 'You see "{c}" at the post office or hospital.', "စာတိုက် သို့မဟုတ် ဆေးရုံတွင် 「{c}」 ကို တွေ့သည်။"),
+    "k02-d1": ("券売機の画面に「{c}」と出る。", 'The ticket machine shows "{c}".', "လက်မှတ်စက် မျက်နှာပြင်တွင် 「{c}」 ပေါ်သည်။"),
+    "k02-d2": ("ATMで「{c}」の操作をする。", 'Use "{c}" on the ATM.', "ATM တွင် 「{c}」 လုပ်သည်။"),
+    "k02-d3": ("自動販売機に「{c}」とある。", 'The vending machine says "{c}".', "အရောင်းစက်တွင် 「{c}」 ရှိသည်။"),
+    "k02-d4": ("リモコンに「{c}」のボタンがある。", 'The remote has a "{c}" button.', "ရီမုတ်တွင် 「{c}」 ခလုတ် ရှိသည်။"),
+    "k02-d5": ("電話の画面に「{c}」と表示される。", 'The phone displays "{c}".', "ဖုန်းမျက်နှာပြင်တွင် 「{c}」 ပေါ်သည်။"),
+    "k02-d6": ("パソコンで「{c}」を使う。", 'Use "{c}" on the computer.', "ကွန်ပျူတာတွင် 「{c}」 ကို သုံးသည်။"),
+    "k03-d1": ("料金の通知に「{c}」と書いてある。", 'The bill notice says "{c}".', "ကြေးအကြောင်းကြားတွင် 「{c}」 ဟု ရေးထားသည်။"),
+    "k03-d2": ("不在通知に「{c}」とある。", 'The absence slip says "{c}".', "အိမ်မရှိ လက်မှတ်တွင် 「{c}」 ရှိသည်။"),
+    "k03-d3": ("預かり票に「{c}」と書いてある。", 'The claim ticket says "{c}".', "အပ်လက်မှတ်တွင် 「{c}」 ဟု ရေးထားသည်။"),
+    "k03-d4": ("ゴミの分別に「{c}」と書いてある。", 'The recycling sign says "{c}".', "အမှိုက်ခွဲတွင် 「{c}」 ဟု ရေးထားသည်။"),
+    "k03-d5": ("通知の文に「{c}」が使われている。", 'The notice uses "{c}".', "အကြောင်းကြားစာတွင် 「{c}」 ကို သုံးသည်။"),
+    "k03-d6": ("役所の通知に「{c}」とある。", 'The city notice says "{c}".', "ရုံးအကြောင်းကြားတွင် 「{c}」 ရှိသည်။"),
+    "k04-d1": ("申込書の欄に「{c}」とある。", 'The application form has a "{c}" field.', "လျှောက်လွှာတွင် 「{c}」 ကွက် ရှိသည်။"),
+    "k04-d2": ("履歴書に「{c}」と書く。", 'Write "{c}" on the résumé.', "ကိုယ်ရေးရာဇဝင်တွင် 「{c}」 ကို ရေးသည်။"),
+    "k04-d3": ("メールの文に「{c}」を使う。", 'Use "{c}" in the email.', "မေးလ်တွင် 「{c}」 ကို သုံးသည်။"),
+    "k04-d4": ("ビジネスメールで「{c}」を使う。", 'Use "{c}" in a business email.', "စီးပွားရေးမေးလ်တွင် 「{c}」 ကို သုံးသည်။"),
+    "k04-d5": ("答案用紙に「{c}」と書く。", 'Write "{c}" on the answer sheet.', "အဖြေလွှာတွင် 「{c}」 ကို ရေးသည်။"),
+    "k04-d6": ("作文で「{c}」を使って書く。", 'Use "{c}" in the essay.', "စာစီစာကုံးတွင် 「{c}」 ကို သုံးသည်။"),
+    "k05-d1": ("家庭用品に「{c}」と注意書きがある。", 'The household item warns "{c}".', "အိမ်သုံးပစ္စည်းတွင် 「{c}」 သတိပေးချက် ရှိသည်။"),
+    "k05-d2": ("家具や道具に「{c}」とある。", 'The furniture is labeled "{c}".', "ပရိဘောဂတွင် 「{c}」 ရှိသည်။"),
+    "k05-d3": ("洗剤の表示に「{c}」とある。", 'The detergent label says "{c}".', "ဆပ်ပြာတံဆိပ်တွင် 「{c}」 ရှိသည်။"),
+    "k05-d4": ("薬の説明に「{c}」と書いてある。", 'The medicine label says "{c}".', "ဆေးတံဆိပ်တွင် 「{c}」 ဟု ရေးထားသည်။"),
+    "k05-d5": ("食品の成分に「{c}」とある。", 'The food label lists "{c}".', "အစားအသောက်တွင် 「{c}」 ပါသည်။"),
+    "k05-d6": ("画面に「{c}」と表示される。", 'The screen shows "{c}".', "မျက်နှာပြင်တွင် 「{c}」 ပေါ်သည်။"),
+    "k06-d1": ("チラシに「{c}」と書いてある。", 'The flyer says "{c}".', "လက်ကမ်းစာတွင် 「{c}」 ဟု ရေးထားသည်။"),
+    "k06-d2": ("折り込み広告に「{c}」とある。", 'The insert ad says "{c}".', "ထည့်သွင်းကြော်ငြာတွင် 「{c}」 ရှိသည်။"),
+    "k06-d3": ("イベントの案内に「{c}」とある。", 'The event guide says "{c}".', "ပွဲလမ်းညွှန်တွင် 「{c}」 ရှိသည်။"),
+    "k06-d4": ("地図に「{c}」と書いてある。", 'The map is labeled "{c}".', "မြေပုံတွင် 「{c}」 ဟု ရေးထားသည်။"),
+    "k06-d5": ("展示の説明に「{c}」とある。", 'The exhibit caption says "{c}".', "ပြပွဲ ဖော်ပြချက်တွင် 「{c}」 ရှိသည်။"),
+    "k06-d6": ("比べるとき「{c}」を使う。", 'Use "{c}" when comparing.', "နှိုင်းယှဉ်ရာတွင် 「{c}」 ကို သုံးသည်။"),
+    "k07-d1": ("求人に「{c}」と書いてある。", 'The job ad says "{c}".', "အလုပ်ခေါ်ကြော်ငြာတွင် 「{c}」 ရှိသည်။"),
+    "k07-d2": ("掲示板に「{c}」とある。", 'The notice board says "{c}".', "ကြေညာဘုတ်တွင် 「{c}」 ရှိသည်။"),
+    "k07-d3": ("メニューに「{c}」と書いてある。", 'The menu lists "{c}".', "မီနူးတွင် 「{c}」 ဟု ရေးထားသည်။"),
+    "k07-d4": ("受験案内に「{c}」とある。", 'The exam guide says "{c}".', "စာမေးပွဲလမ်းညွှန်တွင် 「{c}」 ရှိသည်။"),
+    "k07-d5": ("交通情報に「{c}」と出ている。", 'Traffic news shows "{c}".', "လမ်းပန်းသတင်းတွင် 「{c}」 ပေါ်သည်။"),
+    "k07-d6": ("天気予報に「{c}」とある。", 'The weather forecast says "{c}".', "မိုးလေဝသတွင် 「{c}」 ရှိသည်။"),
+    "k08-d1": ("速報の見出しに「{c}」とある。", 'The breaking headline uses "{c}".', "သတင်းအမြန် ခေါင်းစဉ်တွင် 「{c}」 ရှိသည်။"),
+    "k08-d2": ("見出しに「{c}」が使われている。", 'The headline uses "{c}".', "ခေါင်းစဉ်တွင် 「{c}」 ကို သုံးသည်။"),
+    "k08-d3": ("新聞の見出しに「{c}」とある。", 'The newspaper headline says "{c}".', "သတင်းခေါင်းစဉ်တွင် 「{c}」 ရှိသည်။"),
+    "k08-d4": ("社会面の記事に「{c}」とある。", 'The society article uses "{c}".', "လူမှုဆောင်းပါးတွင် 「{c}」 ရှိသည်။"),
+    "k08-d5": ("経済・環境の記事に「{c}」とある。", 'The economy/environment article uses "{c}".', "စီးပွား/ပတ်ဝန်းကျင် ဆောင်းပါးတွင် 「{c}」 ရှိသည်။"),
+    "k08-d6": ("科学・国際の記事に「{c}」とある。", 'The science/world article uses "{c}".', "သိပ္ပံ/နိုင်ငံတကာ ဆောင်းပါးတွင် 「{c}」 ရှိသည်။"),
+}
+
+char_set = {item["character"] for item in KANJI}
 ASSIGN: dict[str, str] = {}
 counts: Counter[str] = Counter()
 
-
-def put(day: str, ch: str) -> bool:
-    if ch not in char_set or ch in ASSIGN:
-        return False
-    if counts[day] >= CAP:
-        return False
-    ASSIGN[ch] = day
-    counts[day] += 1
-    return True
-
-
-for day, text in SEEDS:
+for day, text in DAYS.items():
     for ch in text:
-        put(day, ch)
-
-
-def score(item: dict, day: str) -> int:
-    theme = THEMES[day]
-    total = 0
-    for meaning in item["meanings"]:
-        for word in re.findall(r"[a-zA-Z]+", meaning.lower()):
-            if len(word) < 3:
-                continue
-            if word in theme:
-                total += 3 if len(word) >= 6 else 2
-    return total
-
-
-unassigned = [item for item in items if item["character"] not in ASSIGN]
-unassigned.sort(key=lambda item: -(item.get("freq") or 9999))
-
-for item in unassigned:
-    ranked = sorted(
-        DAYS,
-        key=lambda day: (-score(item, day), counts[day], day),
-    )
-    placed = False
-    for day in ranked:
-        if put(day, item["character"]):
-            placed = True
-            break
-    if not placed:
-        # Raise cap for leftover only after every day is full.
-        day = min(DAYS, key=lambda d: (counts[d], d))
-        ASSIGN[item["character"]] = day
+        if ch not in char_set:
+            raise SystemExit(f"unknown kanji {ch} on {day}")
+        if ch in ASSIGN:
+            raise SystemExit(f"duplicate {ch} {ASSIGN[ch]} vs {day}")
+        ASSIGN[ch] = day
         counts[day] += 1
 
-assert len(ASSIGN) == len(items)
+missing = char_set - set(ASSIGN)
+if missing:
+    raise SystemExit(f"unassigned {missing}")
+
+vocab_by_char: dict[str, list[str]] = {ch: [] for ch in char_set}
+for item in VOCAB:
+    word = item["word"]
+    for ch in char_set:
+        if ch in word and 2 <= len(word) <= 6:
+            vocab_by_char[ch].append(word)
+
+def compounds_for(ch: str) -> list[str]:
+    preferred = [w for w in PREFERRED.get(ch, []) if w]
+    from_vocab: list[str] = []
+    for word in vocab_by_char[ch]:
+        if word in preferred or word in from_vocab:
+            continue
+        if word[0] == ch:
+            from_vocab.append(word)
+    for word in vocab_by_char[ch]:
+        if word in preferred or word in from_vocab:
+            continue
+        from_vocab.append(word)
+    merged: list[str] = []
+    for word in preferred + from_vocab:
+        if word not in merged:
+            merged.append(word)
+        if len(merged) == 3:
+            break
+    if not merged:
+        merged = [ch]
+    return merged
+
 
 print("per-day counts:")
 for week in range(1, 9):
@@ -179,14 +541,42 @@ for week in range(1, 9):
     parts = [f"d{d}:{counts[f'{wid}-d{d}']}" for d in range(1, 7)]
     print(f"  {wid}", " ".join(parts), "total", sum(counts[f"{wid}-d{d}"] for d in range(1, 7)))
 
-lines = [
-    "/** Scene-day map for OpenJLPT N2 kanji (KANJIDIC2 meanings). Not textbook text. */",
+map_lines = [
+    "/** OpenJLPT N2 kanji → 総まとめ scene day. Hand-placed by Japanese use, not textbook lists. */",
     "export const SOUMATOME_KANJI_DAY: Record<string, string> = {",
 ]
-for item in items:
+for item in KANJI:
     ch = item["character"]
-    lines.append(f"  {json.dumps(ch, ensure_ascii=False)}: {json.dumps(ASSIGN[ch])},")
-lines.append("}")
-lines.append("")
-OUT.write_text("\n".join(lines), encoding="utf-8")
-print("wrote", OUT)
+    map_lines.append(f"  {json.dumps(ch, ensure_ascii=False)}: {json.dumps(ASSIGN[ch])},")
+map_lines.append("}")
+map_lines.append("")
+(ROOT / "src/data/soumatome-kanji-map.ts").write_text("\n".join(map_lines), encoding="utf-8")
+
+scene_lines = [
+    "/** Scene 熟語 and original example sentences for each N2 kanji. Not textbook text. */",
+    "export type KanjiScene = {",
+    "  compounds: string[]",
+    "  exampleJa: string",
+    "  exampleEn: string",
+    "  exampleMy: string",
+    "}",
+    "",
+    "export const SOUMATOME_KANJI_SCENES: Record<string, KanjiScene> = {",
+]
+for item in KANJI:
+    ch = item["character"]
+    day = ASSIGN[ch]
+    comps = compounds_for(ch)
+    label = comps[0] if comps else ch
+    ja, en, my = TEMPLATES[day]
+    scene = {
+        "compounds": comps,
+        "exampleJa": ja.format(c=label),
+        "exampleEn": en.format(c=label),
+        "exampleMy": my.format(c=label),
+    }
+    scene_lines.append(f"  {json.dumps(ch, ensure_ascii=False)}: {json.dumps(scene, ensure_ascii=False)},")
+scene_lines.append("}")
+scene_lines.append("")
+(ROOT / "src/data/soumatome-kanji-scenes.ts").write_text("\n".join(scene_lines), encoding="utf-8")
+print("wrote map and scenes")
