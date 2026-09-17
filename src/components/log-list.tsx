@@ -1,16 +1,8 @@
 "use client"
 
 import { useMemo, useState } from "react"
-import {
-  MoreHorizontal,
-  NotebookPen,
-  Pencil,
-  Search,
-  Timer,
-  Trash2,
-  Zap,
-} from "lucide-react"
-import { Button, buttonVariants } from "@/components/ui/button"
+import { NotebookPen, Pencil, Search, Timer, Trash2, Zap } from "lucide-react"
+import { Button } from "@/components/ui/button"
 import {
   Card,
   CardContent,
@@ -26,19 +18,13 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
 import { Input } from "@/components/ui/input"
 import {
   FALLBACK_SUBJECT_COLORS,
   STATUS_LABELS,
   SUBJECT_COLORS,
 } from "@/lib/constants"
-import { addDays, formatPrettyDate } from "@/lib/dates"
+import { addDays, formatPrettyDate, parseISODate } from "@/lib/dates"
 import { formatDuration, totalMinutes } from "@/lib/stats"
 import { cn } from "@/lib/utils"
 import type { MasteryStatus, StudyLog } from "@/lib/types"
@@ -69,10 +55,12 @@ function dayLabel(date: string, today: string) {
   return formatPrettyDate(date)
 }
 
-function sourceLabel(source: StudyLog["source"]) {
-  if (source === "pomodoro") return "Pomodoro"
-  if (source === "preset") return "Quick add"
-  return null
+function calendarParts(date: string) {
+  const parsed = parseISODate(date)
+  return {
+    day: parsed.getDate(),
+    month: parsed.toLocaleDateString(undefined, { month: "short" }),
+  }
 }
 
 export function LogList({ logs, today, onEdit, onDelete }: LogListProps) {
@@ -114,55 +102,58 @@ export function LogList({ logs, today, onEdit, onDelete }: LogListProps) {
   }, [filtered])
 
   return (
-    <Card>
-      <CardHeader className="border-b">
-        <CardTitle>Study log</CardTitle>
-        <CardDescription>
-          {logs.length === 0
-            ? "Nothing saved yet"
-            : `${formatDuration(totalLogged)} across ${logs.length} session${logs.length === 1 ? "" : "s"}`}
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="grid gap-4">
-        <div
-          className="grid grid-cols-4 rounded-full bg-muted p-1"
-          role="tablist"
-          aria-label="Filter sessions"
-        >
-          {FILTERS.map((item) => {
-            const active = filter === item.value
-            return (
-              <button
-                key={item.value}
-                type="button"
-                role="tab"
-                aria-selected={active}
-                onClick={() => setFilter(item.value)}
-                className={cn(
-                  "h-9 rounded-full text-sm font-medium transition-colors",
-                  active
-                    ? "bg-background text-foreground shadow-sm"
-                    : "text-muted-foreground"
-                )}
-              >
-                {item.label}
-              </button>
-            )
-          })}
-        </div>
+    <div className="grid gap-4">
+      <Card>
+        <CardHeader className="border-b">
+          <CardTitle>Study log</CardTitle>
+          <CardDescription>
+            {logs.length === 0
+              ? "Nothing saved yet"
+              : `${formatDuration(totalLogged)} across ${logs.length} session${logs.length === 1 ? "" : "s"}`}
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="grid gap-4">
+          <div
+            className="flex gap-2 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+            role="tablist"
+            aria-label="Filter sessions"
+          >
+            {FILTERS.map((item) => {
+              const active = filter === item.value
+              return (
+                <button
+                  key={item.value}
+                  type="button"
+                  role="tab"
+                  aria-selected={active}
+                  onClick={() => setFilter(item.value)}
+                  className={cn(
+                    "h-10 shrink-0 rounded-full px-4 text-sm font-medium transition-colors",
+                    active
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-muted text-muted-foreground"
+                  )}
+                >
+                  {item.label}
+                </button>
+              )
+            })}
+          </div>
+          <div className="relative">
+            <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              value={query}
+              onChange={(event) => setQuery(event.target.value)}
+              placeholder="Search subjects or notes"
+              className="pl-9"
+            />
+          </div>
+        </CardContent>
+      </Card>
 
-        <div className="relative">
-          <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            value={query}
-            onChange={(event) => setQuery(event.target.value)}
-            placeholder="Search subjects or notes"
-            className="pl-9"
-          />
-        </div>
-
-        {filtered.length === 0 ? (
-          <div className="flex flex-col items-center justify-center gap-2 rounded-2xl bg-muted/50 px-4 py-12 text-center">
+      {filtered.length === 0 ? (
+        <Card>
+          <CardContent className="flex flex-col items-center justify-center gap-2 py-14 text-center">
             <NotebookPen className="size-6 text-muted-foreground" />
             <p className="text-sm font-medium">No matching sessions</p>
             <p className="max-w-sm text-xs text-muted-foreground">
@@ -170,118 +161,123 @@ export function LogList({ logs, today, onEdit, onDelete }: LogListProps) {
                 ? "Tap +15m at the bottom to start a streak and fill the weekly chart."
                 : "Try another filter or search term."}
             </p>
-          </div>
-        ) : (
-          <div className="grid gap-5">
-            {groups.map((group) => (
-              <section key={group.date} className="grid gap-2">
-                <div className="flex items-baseline justify-between px-1">
-                  <h3 className="text-xs font-semibold tracking-[0.14em] text-muted-foreground uppercase">
+          </CardContent>
+        </Card>
+      ) : (
+        groups.map((group) => {
+          const stamp = calendarParts(group.date)
+          return (
+            <section
+              key={group.date}
+              className="rounded-3xl bg-card p-4 ring-1 ring-foreground/8 sm:p-5"
+            >
+              <header className="mb-4 flex items-center gap-3">
+                <div className="flex size-14 shrink-0 flex-col items-center justify-center rounded-2xl bg-primary/12 text-primary">
+                  <span className="text-[10px] font-semibold tracking-[0.14em] uppercase">
+                    {stamp.month}
+                  </span>
+                  <span className="font-heading text-xl leading-none font-semibold tabular-nums">
+                    {stamp.day}
+                  </span>
+                </div>
+                <div className="min-w-0">
+                  <h3 className="font-heading text-lg font-semibold tracking-tight">
                     {dayLabel(group.date, today)}
                   </h3>
-                  <p className="text-xs font-medium tabular-nums text-muted-foreground">
-                    {formatDuration(group.minutes)}
-                    <span className="text-muted-foreground/70">
-                      {" "}
-                      · {group.items.length}
-                    </span>
+                  <p className="text-sm text-muted-foreground">
+                    {formatDuration(group.minutes)} · {group.items.length}{" "}
+                    session{group.items.length === 1 ? "" : "s"}
                   </p>
                 </div>
-                <ul className="overflow-hidden rounded-2xl bg-muted/40">
-                  {group.items.map((log, index) => {
-                    const source = sourceLabel(log.source)
-                    const duration = formatDuration(totalMinutes(log))
-                    return (
-                      <li
-                        key={log.id}
+              </header>
+
+              <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+                {group.items.map((log) => {
+                  const color = subjectColor(log.subject)
+                  return (
+                    <article
+                      key={log.id}
+                      className="flex min-h-44 flex-col rounded-3xl p-4 ring-1 ring-foreground/8"
+                      style={{
+                        background: `linear-gradient(165deg, color-mix(in oklch, ${color} 22%, var(--card)) 0%, var(--card) 48%)`,
+                      }}
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <span
+                          className={cn(
+                            "rounded-full px-2.5 py-1 text-xs font-medium",
+                            log.status === "completed" &&
+                              "bg-primary/15 text-primary",
+                            log.status === "needs_review" &&
+                              "bg-amber-500/15 text-amber-700 dark:text-amber-300",
+                            log.status === "in_progress" &&
+                              "bg-background/70 text-muted-foreground"
+                          )}
+                        >
+                          {STATUS_LABELS[log.status]}
+                        </span>
+                        <p className="font-heading text-2xl font-semibold tracking-tight tabular-nums">
+                          {formatDuration(totalMinutes(log))}
+                        </p>
+                      </div>
+
+                      <h4 className="mt-4 font-heading text-xl font-semibold tracking-tight">
+                        {log.subject}
+                      </h4>
+                      <p className="mt-1 flex items-center gap-1.5 text-xs text-muted-foreground">
+                        {log.source === "pomodoro" ? (
+                          <>
+                            <Timer className="size-3.5" />
+                            Pomodoro
+                          </>
+                        ) : log.source === "preset" ? (
+                          <>
+                            <Zap className="size-3.5" />
+                            Quick add
+                          </>
+                        ) : (
+                          "Logged by hand"
+                        )}
+                      </p>
+                      <p
                         className={cn(
-                          index > 0 && "border-t border-border/60"
+                          "mt-3 flex-1 text-sm leading-relaxed",
+                          log.notes
+                            ? "text-foreground/80"
+                            : "text-muted-foreground italic"
                         )}
                       >
-                        <div className="flex items-stretch">
-                          <button
-                            type="button"
-                            onClick={() => onEdit(log)}
-                            className="flex min-w-0 flex-1 items-stretch gap-3 px-3 py-3 text-left"
-                          >
-                            <span
-                              className="w-1 shrink-0 self-stretch rounded-full"
-                              style={{ backgroundColor: subjectColor(log.subject) }}
-                              aria-hidden
-                            />
-                            <span className="min-w-0 flex-1">
-                              <span className="flex items-center gap-2">
-                                <span className="truncate font-medium">
-                                  {log.subject}
-                                </span>
-                                {log.source === "pomodoro" ? (
-                                  <Timer className="size-3.5 shrink-0 text-muted-foreground" />
-                                ) : null}
-                                {log.source === "preset" ? (
-                                  <Zap className="size-3.5 shrink-0 text-muted-foreground" />
-                                ) : null}
-                              </span>
-                              <span className="mt-0.5 flex flex-wrap items-center gap-x-1.5 text-xs text-muted-foreground">
-                                <span
-                                  className={cn(
-                                    log.status === "completed" && "text-primary",
-                                    log.status === "needs_review" &&
-                                      "text-amber-600 dark:text-amber-400"
-                                  )}
-                                >
-                                  {STATUS_LABELS[log.status]}
-                                </span>
-                                {source ? (
-                                  <>
-                                    <span aria-hidden>·</span>
-                                    <span>{source}</span>
-                                  </>
-                                ) : null}
-                              </span>
-                              {log.notes ? (
-                                <span className="mt-1 block line-clamp-2 text-sm text-muted-foreground">
-                                  {log.notes}
-                                </span>
-                              ) : null}
-                            </span>
-                            <span className="self-center font-heading text-base font-semibold tabular-nums tracking-tight">
-                              {duration}
-                            </span>
-                          </button>
-                          <DropdownMenu>
-                            <DropdownMenuTrigger
-                              className={cn(
-                                buttonVariants({ variant: "ghost", size: "icon" }),
-                                "mt-1.5 mr-1 size-10 shrink-0"
-                              )}
-                              aria-label={`More for ${log.subject}`}
-                            >
-                              <MoreHorizontal />
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end" className="min-w-36">
-                              <DropdownMenuItem onClick={() => onEdit(log)}>
-                                <Pencil />
-                                Edit
-                              </DropdownMenuItem>
-                              <DropdownMenuItem
-                                variant="destructive"
-                                onClick={() => setPendingDelete(log)}
-                              >
-                                <Trash2 />
-                                Delete
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </div>
-                      </li>
-                    )
-                  })}
-                </ul>
-              </section>
-            ))}
-          </div>
-        )}
-      </CardContent>
+                        {log.notes || "No notes yet."}
+                      </p>
+
+                      <div className="mt-4 flex gap-2">
+                        <Button
+                          type="button"
+                          variant="secondary"
+                          className="h-10 flex-1 rounded-full"
+                          onClick={() => onEdit(log)}
+                        >
+                          <Pencil data-icon="inline-start" />
+                          Edit
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          className="h-10 rounded-full px-3"
+                          aria-label={`Delete ${log.subject}`}
+                          onClick={() => setPendingDelete(log)}
+                        >
+                          <Trash2 />
+                        </Button>
+                      </div>
+                    </article>
+                  )
+                })}
+              </div>
+            </section>
+          )
+        })
+      )}
 
       <Dialog
         open={pendingDelete !== null}
@@ -321,6 +317,6 @@ export function LogList({ logs, today, onEdit, onDelete }: LogListProps) {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </Card>
+    </div>
   )
 }
