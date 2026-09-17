@@ -1,4 +1,4 @@
-import { DEFAULT_SETTINGS, LEGACY_STORAGE_KEYS, STORAGE_KEY, SUBJECTS } from "@/lib/constants"
+import { DEFAULT_SETTINGS, LEGACY_STORAGE_KEYS, STORAGE_KEY, SUBJECT_ALIASES, SUBJECTS } from "@/lib/constants"
 import { addDays, todayISO } from "@/lib/dates"
 import type { AppSettings, AppStore, MasteryStatus, StudyLog } from "@/lib/types"
 
@@ -92,12 +92,22 @@ export function parseSettings(value: unknown): AppSettings {
   }
 }
 
+function migrateLogs(logs: StudyLog[]): StudyLog[] {
+  return logs.map((log) => {
+    const subject = SUBJECT_ALIASES[log.subject]
+    if (!subject || subject === log.subject) return log
+    return { ...log, subject }
+  })
+}
+
 function readRawStore(raw: string): AppStore | null {
   try {
     const parsed = JSON.parse(raw) as Partial<AppStore> & {
       version?: number
     }
-    const logs = Array.isArray(parsed.logs) ? parsed.logs.filter(isLog) : null
+    const logs = Array.isArray(parsed.logs)
+      ? migrateLogs(parsed.logs.filter(isLog))
+      : null
     if (!logs) return null
     return {
       logs,
@@ -117,7 +127,10 @@ export function loadStore(): AppStore {
     const raw = window.localStorage.getItem(STORAGE_KEY)
     if (raw) {
       const parsed = readRawStore(raw)
-      if (parsed) return parsed
+      if (parsed) {
+        saveStore(parsed)
+        return parsed
+      }
     }
 
     for (const key of LEGACY_STORAGE_KEYS) {
