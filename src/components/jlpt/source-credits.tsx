@@ -1,7 +1,20 @@
-import { KANJI_OPEN_SOURCES, SOUMATOME_KANJI_BOOK } from "@/data/sources"
+import {
+  KANJI_OPEN_SOURCES,
+  SOUMATOME_GOI_BOOK,
+  SOUMATOME_KANJI_BOOK,
+  VOCAB_OPEN_SOURCES,
+  type OpenSourceCredit,
+} from "@/data/sources"
 
-export function SourceCite({ id }: { id: string }) {
-  const source = KANJI_OPEN_SOURCES.find((entry) => entry.id === id)
+export function SourceCite({
+  id,
+  book = "kanji",
+}: {
+  id: string
+  book?: "kanji" | "goi"
+}) {
+  const list = book === "goi" ? VOCAB_OPEN_SOURCES : KANJI_OPEN_SOURCES
+  const source = list.find((entry) => entry.id === id)
   if (!source) return null
   return (
     <a
@@ -15,7 +28,16 @@ export function SourceCite({ id }: { id: string }) {
   )
 }
 
-export function SourceCredits({ compact = false }: { compact?: boolean }) {
+export function SourceCredits({
+  compact = false,
+  book = "kanji",
+}: {
+  compact?: boolean
+  book?: "kanji" | "goi"
+}) {
+  const textbook = book === "goi" ? SOUMATOME_GOI_BOOK : SOUMATOME_KANJI_BOOK
+  const sources: OpenSourceCredit[] =
+    book === "goi" ? VOCAB_OPEN_SOURCES : KANJI_OPEN_SOURCES
   return (
     <aside className="rounded-3xl bg-card p-4 ring-1 ring-foreground/8">
       <p className="text-[11px] font-medium tracking-[0.14em] text-muted-foreground uppercase">
@@ -24,17 +46,17 @@ export function SourceCredits({ compact = false }: { compact?: boolean }) {
       <p className="mt-2 text-sm">
         課程သည်{" "}
         <a
-          href={SOUMATOME_KANJI_BOOK.url}
+          href={textbook.url}
           target="_blank"
           rel="noreferrer"
           className="font-medium text-primary underline-offset-2 hover:underline"
         >
-          {SOUMATOME_KANJI_BOOK.title}
+          {textbook.title}
         </a>
-        （{SOUMATOME_KANJI_BOOK.publisher}）၏ အပတ်/နေ့ ပုံစံကို လိုက်သည်။ စာအုပ်ပါ စာသား မကူးယူပါ။
+        （{textbook.publisher}）၏ အပတ်/နေ့ ပုံစံကို လိုက်သည်။ စာအုပ်ပါ စာသား မကူးယူပါ။
       </p>
       <ul className={compact ? "mt-3 grid gap-2" : "mt-3 grid gap-2 sm:grid-cols-3"}>
-        {KANJI_OPEN_SOURCES.map((source) => (
+        {sources.map((source) => (
           <li key={source.id}>
             <a
               href={source.url}

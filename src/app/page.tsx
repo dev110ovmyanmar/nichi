@@ -23,10 +23,10 @@ import { formatDuration } from "@/lib/stats"
 const MODULES = [
   {
     href: "/vocab",
-    title: "語彙 · Tango 2500",
-    my: "အခန်း/အပိုင်း ဝေါဟာရ ကတ်များ",
+    title: "語彙 · 総まとめ N2",
+    my: "၈ပတ် × ၇ရက် · 品詞၊ ဥပမာ၊ 実戦問題",
     icon: Languages,
-    detail: "N2 ၁,၇၉၃ + N3 ပြန်လည်သုံးသပ်",
+    detail: "N2 ၁,၇၉၃ + N3 · Ask Publishing ပုံစံ",
   },
   {
     href: "/kanji",

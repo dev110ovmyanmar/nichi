@@ -30,8 +30,31 @@ export const KANJI_OPEN_SOURCES: OpenSourceCredit[] = [
   },
 ]
 
+export const VOCAB_OPEN_SOURCES: OpenSourceCredit[] = [
+  {
+    id: "jmdict",
+    title: "JMdict / EDICT",
+    roleMy: "ဝေါဟာရ အဘိဓာန်",
+    license: "EDRDG",
+    url: "https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project",
+  },
+  {
+    id: "tatoeba",
+    title: "Tatoeba Project",
+    roleMy: "ဥပမာဝါကျများ",
+    license: "CC BY 2.0",
+    url: "https://tatoeba.org",
+  },
+]
+
 export const SOUMATOME_KANJI_BOOK = {
   title: "日本語総まとめ N2 漢字",
+  publisher: "Ask Publishing",
+  url: "https://www.ask-books.com/jlpt/n2/",
+} as const
+
+export const SOUMATOME_GOI_BOOK = {
+  title: "日本語総まとめ N2 語彙",
   publisher: "Ask Publishing",
   url: "https://www.ask-books.com/jlpt/n2/",
 } as const

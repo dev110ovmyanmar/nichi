@@ -8,7 +8,8 @@ import { BookmarkButton, RubyWord } from "@/components/jlpt/ruby-word"
 import { AudioPlayer } from "@/components/jlpt/audio-player"
 import { PosTags } from "@/components/jlpt/sentence"
 import { Input } from "@/components/ui/input"
-import { TANGO_CHAPTERS } from "@/data/books"
+import { SOUMATOME_GOI_WEEKS } from "@/data/soumatome-goi"
+import { SourceCredits } from "@/components/jlpt/source-credits"
 import { useJlptProgress } from "@/hooks/use-jlpt-progress"
 import { KANA_ROWS, loadVocab, matchesKanaRow } from "@/lib/jlpt/catalog"
 import { displayMeaning } from "@/lib/jlpt/burmese"
@@ -35,7 +36,7 @@ export function VocabBrowser() {
     const total: Record<string, number> = {}
     const known: Record<string, number> = {}
     if (!items) return { total, known }
-    for (const chapter of TANGO_CHAPTERS) {
+    for (const chapter of SOUMATOME_GOI_WEEKS) {
       const stats = chapterProgress(items, chapter.id, progress.knownVocab)
       total[chapter.id] = stats.total
       known[chapter.id] = stats.known
@@ -71,7 +72,7 @@ export function VocabBrowser() {
             tab === "chapters" ? "bg-primary text-primary-foreground" : "bg-muted"
           )}
         >
-          Tango 2500 အခန်းများ
+          ８週
         </button>
         <button
           type="button"
@@ -88,7 +89,7 @@ export function VocabBrowser() {
       {tab === "chapters" ? (
         items ? (
           <ChapterList
-            chapters={TANGO_CHAPTERS}
+            chapters={SOUMATOME_GOI_WEEKS}
             hrefFor={(id) => `/vocab/ch/${id}`}
             counts={counts.total}
             known={counts.known}
@@ -207,6 +208,7 @@ export function VocabBrowser() {
           ) : null}
         </>
       )}
+      <SourceCredits book="goi" />
     </div>
   )
 }

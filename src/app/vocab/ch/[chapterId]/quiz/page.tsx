@@ -4,6 +4,7 @@ import { use, useEffect, useMemo, useState } from "react"
 import { ChapterQuiz } from "@/components/jlpt/chapter-quiz"
 import { ModuleHero } from "@/components/jlpt/module-hero"
 import { tangoChapter } from "@/data/books"
+import { chapterUnitLabel } from "@/lib/jlpt/labels"
 import { loadVocab } from "@/lib/jlpt/catalog"
 import { itemsInChapter } from "@/lib/jlpt/curriculum"
 import { vocabQuiz } from "@/lib/jlpt/quiz"
@@ -27,15 +28,15 @@ export default function TangoQuizPage({
     return vocabQuiz(itemsInChapter(items, chapterId))
   }, [items, chapterId])
 
-  if (!chapter) return <p>အခန်း မတွေ့ပါ။</p>
+  if (!chapter) return <p>အပတ် မတွေ့ပါ။</p>
 
   return (
     <div>
       <ModuleHero
         backHref={`/vocab/ch/${chapter.id}`}
-        kicker={`第${chapter.number}章 quiz`}
+        kicker={`${chapterUnitLabel(chapter)} 実戦問題`}
         title={chapter.titleJa}
-        description="အဓိပ္ပာယ် ရွေးခြင်းနှင့် 星問題 ဖတ်ပုံ။ ၇၀% အထက် ရရင် အခန်း ပြီးဆုံး မှတ်သည်။"
+        description="အဓိပ္ပာယ် ရွေးခြင်းနှင့် 星問題 ဖတ်ပုံ။ ၇၀% အထက် ရရင် ဤအပတ် ပြီးဆုံး မှတ်သည်။"
       />
       {items ? (
         <ChapterQuiz

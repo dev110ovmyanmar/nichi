@@ -61,23 +61,23 @@ export const SOUMATOME_KANJI_WEEKS: CurriculumChapter[] = [
         "sign", "notice", "warning", "caution", "danger", "forbidden", "prohibit",
         "stop", "keep", "out", "emergency", "alert", "strict",
       ]),
-      day("k01", 2, "建物の中の表示", "အဆောက်အအုံတွင်း ဖော်ပြချက်", [
+      day("k01", 2, "建物の中でよく見る表示", "အဆောက်အအုံတွင်း မကြာခဏ တွေ့ရသော ဖော်ပြချက်", [
         "building", "floor", "elevator", "stair", "entrance", "exit", "open",
         "close", "room", "hall", "gate", "wall", "office",
       ]),
-      day("k01", 3, "建物の設備", "အဆောက်အအုံ ပစ္စည်းများ", [
+      day("k01", 3, "建物の内外でよく見る表示", "အဆောက်အအုံ အတွင်း/အပြင် ဖော်ပြချက်", [
         "door", "window", "light", "air", "toilet", "restroom", "park",
         "facility", "equipment", "use",
       ]),
-      day("k01", 4, "駅の表示", "ဘူတာ ဆိုင်းဘုတ်", [
+      day("k01", 4, "駅でよく見る表示", "ဘူတာတွင် မကြာခဏ တွေ့ရသော ဖော်ပြချက်", [
         "station", "ticket", "transfer", "platform", "line", "track", "arrive",
         "depart", "delay", "schedule",
       ]),
-      day("k01", 5, "乗り物の表示", "ယာဉ်ပေါ် ဖော်ပြချက်", [
+      day("k01", 5, "乗り物でよく見る表示", "ယာဉ်ပေါ် မကြာခဏ တွေ့ရသော ဖော်ပြချက်", [
         "train", "bus", "car", "vehicle", "ride", "seat", "priority", "baggage",
         "smoke", "emergency",
       ]),
-      day("k01", 6, "郵便局・病院", "စာတိုက်နှင့် ဆေးရုံ", [
+      day("k01", 6, "郵便局・病院でよく見る表示", "စာတိုက်နှင့် ဆေးရုံ ဖော်ပြချက်", [
         "post", "mail", "letter", "hospital", "clinic", "doctor", "nurse",
         "medicine", "patient", "pharmacy",
       ]),
@@ -99,7 +99,7 @@ export const SOUMATOME_KANJI_WEEKS: CurriculumChapter[] = [
         "money", "cash", "pay", "bank", "account", "withdraw", "deposit", "card",
         "pin", "balance",
       ]),
-      day("k02", 3, "自動販売機", "အလိုအလျောက်ရောင်းစက်", [
+      day("k02", 3, "自動販売機・自動券売機", "အရောင်းစက် / လက်မှတ်စက်", [
         "sell", "vending", "drink", "coin", "change", "product", "buy",
       ]),
       day("k02", 4, "家電のリモコン", "အိမ်သုံးပစ္စည်း ရီမုတ်", [
@@ -110,7 +110,7 @@ export const SOUMATOME_KANJI_WEEKS: CurriculumChapter[] = [
         "phone", "call", "mobile", "signal", "charge", "battery", "number",
         "hold", "message",
       ]),
-      day("k02", 6, "パソコン", "ကွန်ပျူတာ", [
+      day("k02", 6, "携帯電話・パソコン", "မိုဘိုင်းနှင့် ကွန်ပျူတာ", [
         "computer", "program", "file", "screen", "data", "network", "password",
         "print", "save",
       ]),
@@ -125,14 +125,14 @@ export const SOUMATOME_KANJI_WEEKS: CurriculumChapter[] = [
     "言",
     "စကား",
     [
-      day("k03", 1, "料金通知・振込", "ကြေးနှင့် လွှဲငွေ", [
+      day("k03", 1, "料金通知・振込用紙", "ကြေးအကြောင်းကြားနှင့် လွှဲလွှာ", [
         "fee", "bill", "charge", "transfer", "pay", "due", "tax", "cost",
         "amount",
       ]),
       day("k03", 2, "不在通知", "အိမ်မရှိ သတင်း", [
         "absent", "away", "delivery", "receive", "again", "leave", "notice",
       ]),
-      day("k03", 3, "カード・券・預かり", "ကတ်၊ လက်မှတ်၊ အပ်နှံ", [
+      day("k03", 3, "ポイントカード・商品券・預かり票", "ပွိုင့်ကတ်၊ ကူပွန်၊ အပ်လက်မှတ်", [
         "card", "coupon", "ticket", "point", "deposit", "keep", "receipt",
         "clean",
       ]),
@@ -189,23 +189,23 @@ export const SOUMATOME_KANJI_WEEKS: CurriculumChapter[] = [
     "食",
     "စား",
     [
-      day("k05", 1, "家庭用品① 熱源", "အိမ်သုံး ၁ · အပူ", [
+      day("k05", 1, "家庭用品（熱源）", "အိမ်သုံး · အပူ", [
         "heat", "hot", "pot", "heater", "boil", "warm", "fire", "steam",
       ]),
-      day("k05", 2, "家庭用品②", "အိမ်သုံး ၂", [
+      day("k05", 2, "家庭用品（洗剤①）", "အိမ်သုံး · ဆပ်ပြာ ၁", [
         "home", "furniture", "tool", "box", "bag", "cloth", "use",
       ]),
-      day("k05", 3, "洗剤・掃除", "ဆပ်ပြာနှင့် သန့်ရှင်းရေး", [
+      day("k05", 3, "家庭用品（洗剤②）", "အိမ်သုံး · ဆပ်ပြာ ၂", [
         "wash", "soap", "clean", "dirt", "stain", "laundry",
       ]),
-      day("k05", 4, "薬", "ဆေးဝါး", [
+      day("k05", 4, "家庭用品（薬）", "အိမ်သုံး · ဆေး", [
         "medicine", "drug", "pill", "dose", "pain", "sick", "symptom", "heal",
       ]),
       day("k05", 5, "食品", "အစားအသောက်", [
         "food", "eat", "taste", "fresh", "expire", "ingredient", "salt",
         "sugar", "oil", "meat", "fish", "rice",
       ]),
-      day("k05", 6, "インターホン・操作", "အင်တာကွန်နှင့် ခလုတ်", [
+      day("k05", 6, "インターホン・パソコン", "အင်တာကွန်နှင့် ကွန်ပျူတာ", [
         "intercom", "button", "open", "talk", "camera", "lock",
       ]),
       day("k05", 7, "実戦問題", "အပတ်စဉ် လေ့ကျင့်ခန်း", []),
@@ -223,10 +223,10 @@ export const SOUMATOME_KANJI_WEEKS: CurriculumChapter[] = [
         "ad", "advertis", "flyer", "sale", "discount", "special", "free",
         "limited",
       ]),
-      day("k06", 2, "店の案内", "ဆိုင် လမ်းညွှန်", [
+      day("k06", 2, "折り込み広告", "ထည့်သွင်း ကြော်ငြာ", [
         "shop", "store", "open", "closed", "floor", "guide", "bargain",
       ]),
-      day("k06", 3, "イベント", "ပွဲတော်", [
+      day("k06", 3, "店の案内・イベント", "ဆိုင် လမ်းညွှန်နှင့် ပွဲ", [
         "event", "festival", "celebrate", "hold", "join", "ticket",
       ]),
       day("k06", 4, "地図", "မြေပုံ", [
@@ -255,10 +255,10 @@ export const SOUMATOME_KANJI_WEEKS: CurriculumChapter[] = [
         "recruit", "hire", "job", "salary", "work", "apply", "staff", "want",
         "campaign", "enlist",
       ]),
-      day("k07", 2, "掲示板・地域", "ကြေညာဘုတ်နှင့် ရပ်ကွက်", [
+      day("k07", 2, "掲示板・地域新聞", "ကြေညာဘုတ်နှင့် ရပ်ကွက်သတင်း", [
         "board", "community", "local", "newspaper", "region", "town", "ward",
       ]),
-      day("k07", 3, "メニュー・成分", "မီနူးနှင့် ပါဝင်ပစ္စည်း", [
+      day("k07", 3, "メニュー・成分表示", "မီနူးနှင့် ပါဝင်ပစ္စည်း ဖော်ပြချက်", [
         "menu", "ingredient", "calorie", "contain", "allergy", "taste",
       ]),
       day("k07", 4, "受験案内", "စာမေးပွဲ လမ်းညွှန်", [

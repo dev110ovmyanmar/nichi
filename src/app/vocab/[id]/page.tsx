@@ -7,6 +7,9 @@ import { ModuleHero } from "@/components/jlpt/module-hero"
 import { BookmarkButton, RubyWord } from "@/components/jlpt/ruby-word"
 import { FuriganaSentence, PosTags } from "@/components/jlpt/sentence"
 import { tangoChapter } from "@/data/books"
+import { SOUMATOME_GOI_BOOK } from "@/data/sources"
+import { SourceCite, SourceCredits } from "@/components/jlpt/source-credits"
+import { chapterUnitLabel, sectionUnitLabel } from "@/lib/jlpt/labels"
 import { Button } from "@/components/ui/button"
 import { useJlptProgress } from "@/hooks/use-jlpt-progress"
 import { displayMeaning } from "@/lib/jlpt/burmese"
@@ -54,7 +57,7 @@ export default function VocabDetailPage({
     <div className="grid gap-5">
       <ModuleHero
         backHref={chapter ? `/vocab/ch/${chapter.id}` : "/vocab"}
-        kicker="語彙 · Tango 2500"
+        kicker={`語彙 · ${SOUMATOME_GOI_BOOK.title}`}
         title={item.word}
         description={displayMeaning(item.meanings, item.meaningMy)}
       />
@@ -72,8 +75,8 @@ export default function VocabDetailPage({
       <PosTags pos={item.pos} transitivity={item.transitivity} level={item.level} />
       {chapter ? (
         <p className="text-sm text-muted-foreground">
-          第{chapter.number}章 {chapter.titleJa}
-          {section ? ` · ${section.titleJa}` : ""}
+          {chapterUnitLabel(chapter)} {chapter.titleJa}
+          {section ? ` · ${sectionUnitLabel(chapter, section)} ${section.titleJa}` : ""}
         </p>
       ) : null}
       <ul className="grid gap-1 text-sm text-muted-foreground">
@@ -81,6 +84,10 @@ export default function VocabDetailPage({
           <li key={meaning}>· {meaning}</li>
         ))}
       </ul>
+      <div className="flex items-baseline justify-between gap-2">
+        <p className="text-sm font-medium">例文</p>
+        <SourceCite id="tatoeba" book="goi" />
+      </div>
       {(item.examples ?? []).map((example) => (
         <figure key={example.ja} className="rounded-3xl bg-card p-4 ring-1 ring-foreground/8">
           <blockquote className="text-lg">
@@ -113,10 +120,11 @@ export default function VocabDetailPage({
             href={`/vocab/ch/${chapter.id}/quiz`}
             className="inline-flex h-11 items-center rounded-2xl bg-secondary px-4 text-sm font-medium"
           >
-            အခန်း quiz
+            実戦問題
           </Link>
         ) : null}
       </div>
+      <SourceCredits compact book="goi" />
     </div>
   )
 }

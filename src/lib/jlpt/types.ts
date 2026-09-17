@@ -53,7 +53,7 @@ export type CurriculumSection = {
 
 export type CurriculumChapter = {
   id: string
-  book: "tango" | "kanji-master" | "soumatome-kanji"
+  book: "tango" | "kanji-master" | "soumatome-kanji" | "soumatome-goi"
   number: number
   titleJa: string
   titleMy: string

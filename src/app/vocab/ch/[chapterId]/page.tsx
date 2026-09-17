@@ -7,6 +7,9 @@ import { ModuleHero } from "@/components/jlpt/module-hero"
 import { BookmarkButton, RubyWord } from "@/components/jlpt/ruby-word"
 import { PosTags } from "@/components/jlpt/sentence"
 import { tangoChapter } from "@/data/books"
+import { SOUMATOME_GOI_BOOK } from "@/data/sources"
+import { SourceCredits } from "@/components/jlpt/source-credits"
+import { chapterUnitLabel, isPracticeSection, sectionUnitLabel } from "@/lib/jlpt/labels"
 import { useJlptProgress } from "@/hooks/use-jlpt-progress"
 import { displayMeaning } from "@/lib/jlpt/burmese"
 import { loadVocab } from "@/lib/jlpt/catalog"
@@ -33,13 +36,13 @@ export default function TangoChapterPage({
     [items, chapterId]
   )
 
-  if (!chapter) return <p>အခန်း မတွေ့ပါ။</p>
+  if (!chapter) return <p>အပတ် မတွေ့ပါ။</p>
 
   return (
     <div className="grid gap-5">
       <ModuleHero
         backHref="/vocab"
-        kicker={`Tango 2500 · 第${chapter.number}章`}
+        kicker={`${SOUMATOME_GOI_BOOK.title} · ${chapterUnitLabel(chapter)}`}
         title={chapter.titleJa}
         description={chapter.summaryMy}
       />
@@ -48,7 +51,7 @@ export default function TangoChapterPage({
           href={`/vocab/ch/${chapter.id}/quiz`}
           className="inline-flex h-10 items-center rounded-full bg-primary px-4 text-sm font-medium text-primary-foreground"
         >
-          အခန်း quiz + 星問題
+          ７日目 実戦問題
         </Link>
         <p className="self-center text-xs text-muted-foreground">
           {inChapter.length} ဝေါဟာရ
@@ -62,12 +65,22 @@ export default function TangoChapterPage({
           return (
             <section key={section.id} className="grid gap-2">
               <h2 className="font-heading text-base font-semibold">
-                {section.number}. {section.titleJa}
+                {sectionUnitLabel(chapter, section)} {section.titleJa}
                 <span className="my-script ml-2 text-sm font-normal text-muted-foreground">
                   {section.titleMy}
                 </span>
               </h2>
-              {words.length === 0 ? (
+              {isPracticeSection(section) ? (
+                <Link
+                  href={`/vocab/ch/${chapter.id}/quiz`}
+                  className="rounded-3xl bg-card p-4 ring-1 ring-foreground/8"
+                >
+                  <p className="font-medium">ဤအပတ် 語彙 ကို quiz ဖြင့် စစ်ပါ။</p>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    အဓိပ္ပာယ်နှင့် 星問題 · ၇၀% အထက် ရရင် အပတ် ပြီးဆုံး။
+                  </p>
+                </Link>
+              ) : words.length === 0 ? (
                 <p className="text-sm text-muted-foreground">ဤအပိုင်းတွင် စကားလုံး မရှိသေးပါ။</p>
               ) : (
                 <div className="grid gap-2">
@@ -124,6 +137,7 @@ export default function TangoChapterPage({
           )
         })
       )}
+      <SourceCredits compact book="goi" />
     </div>
   )
 }
